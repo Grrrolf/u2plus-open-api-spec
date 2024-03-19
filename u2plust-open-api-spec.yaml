@@ -1,0 +1,2942 @@
+openapi: 3.0.1
+info:
+  title: U2+ REST API
+  description: Starting from Ultimate firmware 3.11, the application supports
+    API calls by means of the HTTP protocol. <br>This simplifies the
+    integration of remote control functionality in external
+    applications, as it follows a well defined standard.
+  version: 0.1.0
+servers:
+  - url: http://{host}/{basePath}
+    description: U2+ REST API
+    variables:
+      host:
+        default: 192.168.64.176
+        description: Enter the host name or IP-address of your Ultimate devivce.
+      basePath:
+        default: v1
+paths:
+  /version:
+    get:
+      operationId: getVersion
+      summary: About
+      description: Returns the current version of the REST API.
+      tags:
+        - About
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                example:
+                  value: |-
+                    {
+                      "version": "0.1",
+                      "errors": [ ]
+                    }
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '504':
+          description: Gateway Timeout
+  /machine:reset:
+    put:
+      operationId: resetMachine
+      summary: Reset machine
+      description: Reset to the machine. The current configuration is not changed.
+      tags:
+        - Machine operations
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+  /machine:reboot:
+    put:
+      operationId: rebootMachine
+      summary: Reboot machine
+      description: Restart the machine. Re-initializes the cartridge configuration and sends a reset to the machine.
+      tags:
+        - Machine operations
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+  /machine:pause:
+    put:
+      operationId: pauseMachine
+      summary: Pause machine
+      description: |-
+        Pausing machine by pulling the DMA line low at a safe moment. This stops the CPU. Note that this does not 
+        stop any timers.
+      tags:
+        - Machine operations
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+  /machine:resume:
+    put:
+      operationId: resumeMachine
+      summary: Resume machine
+      description: Resumes the machine from the paused state, releasing the DMA line to continue CPU execution.
+      tags:
+        - Machine operations
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+          content:
+            application/json: { }
+  /machine:poweroff:
+    put:
+      operationId: poweroffMachine
+      summary: Power off machine
+      description: |-
+        This U64-only command causes the machine to power off. Note that it is likely that you won’t receive a 
+        valid response.
+      tags:
+        - Machine operations
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+  /machine:readmem:
+    get:
+      operationId: readMemory
+      summary: Read data from memory
+      description: |
+        This command performs a DMA read action on the cartridge bus and returns the result as a binary attachment. 
+        * The address argument specifies the memory location in hexadecimal format. 
+        * The optional argument length specifies the number of bytes being read. 
+        * When the length is not specified, 256 bytes are returned.
+        * The length speficied should not exceed memory address location $FFFF
+      tags:
+        - Machine operations
+      parameters:
+        - in: query
+          description: |
+            Memory address to read data from.
+          name: address
+          required: true
+          schema:
+            type: string
+          example: "1000"
+        - in: query
+          description: |
+            Length of the data to read.
+          name: length
+          required: false
+          schema:
+            type: string
+            default: 256
+            minimum: 0
+            example: 128
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/octet-stream: {}
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                "Invalid address":
+                  value: |-
+                    {
+                      "errors": [ "Invalid address" ]
+                    }
+                "Invalid length":
+                  value: |-
+                    {
+                      "errors": [ "Invalid length" ]
+                    }
+                "Exceeds memory location $FFFF":
+                  value: |-
+                    {
+                      "errors" : [ "Memory read exceeds location $FFFF" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+  /machine:writemem:
+    put:
+      operationId: writeDataToMemoryPut
+      summary: Write data to memory
+      description: |-
+        With this command, data can be written to C64 memory. To be more exact: this command writes data through DMA, 
+        so the memory map that is currently selected is used. Writing to the I/O registers of the 6510 is not 
+        possible. 
+        
+        Data bytes are written in consequetive memory locations. The address argument specifies the memory location in 
+        hexadecimal format. The data argument contains a string of bytes in hexadecimal format. The maxmimum number of 
+        bytes written with this method is 128.
+
+        Example: "PUT /v1/machine:writemem?address=D020&data=0'504'" the values result in 05 being written to $D020 and 
+        04 being written to $D021. In other words: the border will be green and the main screen will turn purple.
+      tags:
+        - Machine operations
+      parameters:
+        - in: query
+          description: |
+            Memory address to write data.
+          name: address
+          required: true
+          schema:
+            type: string
+          example: "D020"
+        - in: query
+          description: |-
+            Data to be written to the memory address. A maximum of 128 bytes can be written.
+          name: data
+          required: true
+          schema:
+            type: string
+          example: "1024"
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                "data written to $D020":
+                  value: |-
+                    {
+                      "address": "D020-D021",
+                      "errors": [ ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                "invalid address":
+                  value: |-
+                    {
+                      "errors": [ "Invalid address" ]
+                    }
+                "exceeded data length":
+                  value: |-
+                    {
+                      "errors" : [ "Maximum length of 128 bytes exceeded. Consider using POST method with attachment." ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+    post:
+      operationId: writeManyDataToMemoryPost
+      summary: Write data to memory
+      description: |-
+        With this command, data can be written to C64 memory. The data, passed as a binary attachment, will be written 
+        to memory starting from the location indicated by the address argument, which shall be formatted in hexadecimal. 
+        
+        The data should not wrap around $FFFF.
+      tags:
+        - Machine operations
+      parameters:
+        - in: query
+          description: |
+            Memory address to write data.
+          name: address
+          required: true
+          schema:
+            type: string
+          example: "1000"
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: {}
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                "data written to address $1000":
+                  value: |-
+                    {
+                      "address": "1000-18f9",
+                      "errors": [ ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              examples:
+                "invalid address":
+                  value: |-
+                    {
+                      "errors": [ "Invalid address" ]
+                    }
+                "exceeded data length":
+                  value: |-
+                    {
+                      "errors" : [ "Maximum length of 128 bytes exceeded. Consider using POST method with attachment." ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+  /machine:debugreg:
+    get:
+      operationId: readDebugRestiger
+      summary: Read debug register
+      description: |
+        This command reads the debug register ($D7FF) and returns it in the “value” field of the JSON response. 
+        The value is in hexadecimal format. This is currently an U64-only call.
+      tags:
+        - Machine operations
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                "Invalid address":
+                  value: |-
+                    {
+                      "value": "00",
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+    put:
+      operationId: writeDebugRestiger
+      summary: Write to debug register
+      description: |
+        This command writes the value specified by the value argument (in hexadecimal) into the debug register ($D7FF), 
+        and then reads the debug register ($D7FF) and returns it in the “value” field of the JSON response. 
+        This is currently an U64-only call.
+      tags:
+        - Machine operations
+      parameters:
+        - in: query
+          description: |
+            Write hexadecimal value into debug register
+          name: value
+          required: true
+          schema:
+            type: string
+          example: "3F"
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                "Invalid address":
+                  value: |-
+                    {
+                      "value": "3F",
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+  /runners:sidplay:
+    put:
+      operationId: putSidPlay
+      summary: Play SID file located on device
+      description: |
+        This command requests the Ultimate to play a SID file. The file argument points to an existing file in the file 
+        system of the Ultimate. It plays the default song, unless the optional songnr argument is given. The player will 
+        attempt to open the song lengths file in the subdirectory ‘SONGLENGTHS’.
+      tags:
+        - Runners
+      parameters:
+        - in: query
+          description: |
+            Location of the SID file on the device
+          name: file
+          required: true
+          schema:
+            type: string
+          example: /Temp/Music/Sams_Journey.sid
+        - in: query
+          description: |
+            Song number
+          name: songnr
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function sidplay does not have parameter invalidParameterName", "Function sidplay requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+    post:
+      operationId: postSidPlay
+      summary: Send and play SID file
+      description: |
+        This command requests the Ultimate to play a SID file. The file argument points to an existing file in the file 
+        system of the Ultimate. It plays the default song, unless the optional songnr argument is given. The player will 
+        attempt to open the song lengths file in the subdirectory ‘SONGLENGTHS’.
+      tags:
+        - Runners
+      parameters:
+        - in: query
+          description: |
+            Song number
+          name: songnr
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: {}
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function sidplay does not have parameter invalidParameterName", "Function sidplay requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+  /runners:modplay:
+    put:
+      operationId: putModPlay
+      summary: Play an Amiga MOD file from Ultimate's storage
+      description: |
+        This command requests the Ultimate to play an Amiga MOD file. The file argument points to an existing file in 
+        the file system of the Ultimate.
+      tags:
+        - Runners
+      parameters:
+        - in: query
+          description: |
+            Location and name of the AMIGA mod file on your Ultimate device's storage
+          name: file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function modplay does not have parameter invalidParameterName", "Function modplay requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+    post:
+      operationId: postModplay
+      summary: Send and play Amiga MOD file
+      description: |
+        This command requests the Ultimate to play the Amiga MOD file that is attached as a file to the request.
+      tags:
+        - Runners
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: {}
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function modplay does not have parameter invalidParameterName", "Function modplay 
+                    requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+  /runners:load_prg:
+    put:
+      operationId: putLoadPrg
+      summary: Load a programme file from the local file system
+      description: |
+        With this command a progam can be loaded into memory. The file argument points to an existing file in the file 
+        system of the Ultimate. The machine resets, and loads the designated program into memory using DMA. Then it 
+        automatically runs the program.
+      tags:
+        - Runners
+      parameters:
+        - in: query
+          description: |
+            Location and name of the programme file on your Ultimate device's storage
+          name: file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function loadprg does not have parameter invalidParameterName", "Function loadprg requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+    post:
+      operationId: postRunPrg
+      summary: Send and run a programme file
+      description: |
+        With this command a progam can be loaded into memory. The machine resets, and loads the attached program into 
+        memory using DMA. Then it automatically runs the program.
+      tags:
+        - Runners
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: {}
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function loadprg does not have parameter invalidParameterName", "Function loadprg 
+                    requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+  /runners:run_prg:
+    put:
+      operationId: putRunPrg
+      summary: Load a programme file from the U2+'s file system
+      description: |
+        With this command a progam can be loaded into memory. The file argument points to an existing 
+        file in the file system of the Ultimate. The machine resets, and loads the designated program 
+        into memory using DMA. Then it automatically runs the program.
+      tags:
+        - Runners
+      parameters:
+        - in: query
+          description: |
+            Location and name of the programme file on your Ultimate device's storage
+          name: file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function run_prg does not have parameter invalidParameterName", "Function run_prg 
+                    requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+    post:
+      operationId: postLoadPrg
+      summary: Send and load a programme file
+      description: |
+        With this command a progam can be loaded into memory. The machine resets, and loads the attached program into 
+        memory using DMA. It does not automatically run the program.
+      tags:
+        - Runners
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: { }
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function run_prg does not have parameter invalidParameterName", "Function run_prg requires parameter file" ]
+                    }
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+  /runners:run_crt:
+    put:
+      operationId: putRunCrt
+      summary: Load and run cartridge image file from the U2+'s file system
+      description: |
+        With this command a progam can be loaded into memory. The file argument points to an existing file in the file 
+        system of the Ultimate. The machine resets, and loads the designated program into memory using DMA. It does not 
+        automatically run the program.
+      tags:
+        - Runners
+      parameters:
+        - in: query
+          description: |
+            Location and  name of the cartrige image file on your Ultimate device's storage
+          name: file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function loadprg does not have parameter invalidParameterName" ]
+                    }
+                "Requires parameter file":
+                  value: |-
+                    {
+                      "errors" : [ "Function run_crt requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+    post:
+      operationId: postRunCrt
+      summary: Send, load and run cartridge image
+      description: |
+        This command starts a supplied cartridge file. The ‘crt’ file is attached to the POST request. The machine 
+        resets, with the attached cartridge active. It does not alter the configuration of the Ultimate.
+      tags:
+        - Runners
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: { }
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": [ ]
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function run_crt does not have parameter invalidParameterName", "Function run_crt 
+                    requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+  /drives:
+    get:
+      operationId: getDrivesConfig
+      summary: Load the drives configuration
+      description: |
+        With this command, the information about all the (internal) drives on the IEC bus is returned. 
+        In addition to the presence, it also shows the image files and paths of the mounted disks or 
+        referenced paths. An example follows:
+      tags:
+        - Floppy drives
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "drives": [
+                        {
+                          "a": {
+                            "enabled": true,
+                            "bus_id": 8,
+                            "type": "1581",
+                            "rom": "1581.rom",
+                            "image_file": "",
+                            "image_path": ""
+                          }
+                        },
+                        {
+                          "b": {
+                            "enabled": false,
+                            "bus_id": 9,
+                            "type": "1541",
+                            "rom": "1541.rom",
+                            "image_file": "",
+                            "image_path": ""
+                          }
+                        },
+                        {
+                          "IEC Drive": {
+                            "bus_id": 11,
+                            "enabled": false,
+                            "type": "DOS emulation",
+                            "last_error": "73,U64IEC ULTIMATE DOS V1.1,00,00",
+                            "partitions": [
+                              {
+                                "id": 0,
+                                "path": "/Usb0/"
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "Printer Emulation": {
+                            "bus_id": 4,
+                            "enabled": false
+                          }
+                        }
+                      ],
+                      "errors": []
+                    }
+  /drives/{drive}:mount:
+    put:
+      operationId: putMountDiskImage
+      summary: Load a disk image file from the U2+'s file system
+      description: |
+        This command can be used to mount an existing image onto the drive specified in the path. The image argument 
+        points to the file in the file system of the Ultimate. The optional type argument specifies the type of the 
+        image, and could be one of the following: `d64`, `g64`, `d71`, `g71` or `d81`. If this argument is omitted, it will use 
+        the file extension of the file specified. The optional mode argument can be one of the following: 
+        - 'readwrite' -  In readwrite mode, the drive can write to the image file. 
+        - 'readonly' - In readonly mode the disk is write protected. 
+        - 'unlinked' - In unlinked mode the disk is not write protected, but the changes are not written back to the disk image.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            The drive `a` or `b` the disk image will be mounted on.<br>
+            _Please note that the disk drive does not have to be enabled to mount a disk._
+
+            Valid optons are one of the following:<br>
+            `a`, `b`
+        - in: query
+          description: |
+            Location and  name of the disk image file on your Ultimate device's storage
+          name: image
+          required: true
+          schema:
+            type: string
+        - in: query
+          description: |-
+            The tpye or format of the disk image.<br>
+            Valid options are one of the following:<br>
+            `d64`, `g64`, `d71`, `g71` or `d81`
+            
+            When this parameter is omitted, then the API will look at the file extension.
+          name: type
+          required: false
+          schema:
+            type: string
+        - in: query
+          description: |-
+            The mode of operation for the disk image. 
+            <br>Valdid options are one of the following:<br>
+            `readwrite`, `readonly` or `unlinked`
+
+            When this parameter is omitted, then the API will mount the disk as `readwrite`
+          name: mode
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "Subsys": 2,
+                      "Ftype": 1541,
+                      "command": 5408,
+                      "file": "/Usb1/Collections/X/x2023/demo/8580/01.next level/image3.d64",
+                      "errors": []
+                    }
+                "Invalid parameter name":
+                  value: |-
+                    {
+                      "errors" : [ "Function loadprg does not have parameter invalidParameterName Function run_crt, requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+                Invalid type:
+                  value: |-
+                    { 
+                      "errors" : [ "Invalid Type 'd65'" ]
+                    }
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+    post:
+      operationId: postMountDisk
+      summary: Send, load and run cartridge image nn
+      description: |
+        This command can be used to mount a disk image that is sent along as an attachment onto drive specified in the 
+        path. The optional type argument specifies the type of the image, and could be one of the following: 
+        d64, g64, d71, g71 or d81. If this argument is omitted, it will use the file extension of the file that was 
+        uploaded, if this name is given in the Content-Deposition. The optional mode argument can be one of the 
+        following: readwrite, readonly or unlinked. In readwrite mode, the drive can write to the image file; 
+        in readonly mode the disk is write protected and in unlinked mode the disk is not write protected, but the 
+        changes are not written back to the disk image.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            The drive `a` or `b` the disk image will be mounted on.<br>
+            _Please note that the disk drive does not have to be enabled to mount a disk._
+
+            Valid optons are one of the following: <br>
+            `a`, `b`
+        - in: query
+          description: |-
+            The tpye or format of the disk image.<br>
+            Valid options are one of the following:<br>
+            `d64`, `g64`, `d71`, `g71` or `d81`
+            
+            When this parameter is omitted, then the API will look at the file extension.
+          name: type
+          required: false
+          schema:
+            type: string
+        - in: query
+          description: |-
+            The mode of operation for the disk image. 
+            <br>Valdid options are one of the following:<br>
+            `readwrite`, `readonly` or `unlinked`
+          name: mode
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: { }
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |
+                    {
+                      "errors": [ ]
+                    }
+                Invalid parameter name:
+                  value: |
+                    {
+                      "errors" : [ "Function mount does not have parameter invalidParameterName", "Function mount requires parameter file" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              examples:
+                Undefined subsystem command:
+                  value: |-
+                    {
+                      "errors" : [ "Undefined subsystem command" ]
+                    }
+                Out of memory:
+                  value: |-
+                    {
+                      'errors': ['Read operation on file failed']
+                    }
+        '507':
+          description: Unknown
+          content:
+            application/json:
+              examples:
+                Out of memory:
+                  value: |-
+                    {
+                      "errors": [ "Out of memory" ]
+                    }
+  /drives/{drive}:reset:
+    put:
+      operationId: putResetDiskDrive
+      summary: Reset disk drive
+      description: |
+        Resets the selected drive `a` or `b`.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            The drive to be reset. <br>
+            Valid optons are one of the following: <br>
+            `a`, `b`
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /drives/{drive}:remove:
+    put:
+      operationId: putRemoveDisk
+      summary: Remove disk image
+      description: |
+        Remove disk image from drive `a` or `b`.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            Remove the mounted disk iamge from the drive.<br>
+            Valid optons are one of the following: <br>
+            `a`, `b`
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /drives/{drive}:unlink:
+    put:
+      operationId: putUnlinkDisk
+      summary: Unlink disk image
+      description: |
+        Remove disk image from drive `a` or `b`.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            Beak the link between the drive and the mounted disk image file.
+            Further writes will no longer be reflected in the image file.<br>
+            Valid optons are one of the following: <br>
+            `a`, `b`
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /drives/{drive}:on:
+    put:
+      operationId: putUnEnableDrive
+      summary: Enables disk drive
+      description: |
+        Enables drive `a` or `b`.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            Enables disk drive `a` or `b`. When the drive was already on it is reset.<br>
+            Valid optons are one of the following: <br>
+            `a`, `b`
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /drives/{drive}:off:
+    put:
+      operationId: putDisableDrive
+      summary: Disables disk drive
+      description: |
+        Disable disk drive `a` or `b`.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            Disables disk drive `a` or `b`. It will no longer be accessible on the serial bus.
+            
+            Valid optons are one of the following: <br>
+            `a`, `b`
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /drives/{drive}:load_rom:
+    put:
+      operationId: putLoaDrivedRom
+      summary: Load drive rom
+      description: |
+        Loads a new disk drive ROM into the selected drive. <br>
+        The `file` parameter points to a file that is already present on the file system of the Ultimate. 
+        The size of the ROM file needs to be 16K or 32K, depending on the drive type. 
+        
+        Loading the ROM is a temporary action, setting the drive type or rebooting the 
+        machine will load the default ROM.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            Load a new drive ROM in drive `a` or `b`.
+            The size of the ROM file needs to be 16K or 32K, depending on the drive type.
+            
+            Valid optons are one of the following: <br>
+            `a`, `b`
+        - in: query
+          description: |
+            Location and  name of the disk drive rom  file on your Ultimate device's storage.
+          name: file
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+    post:
+      operationId: postLoadRom
+      summary: Load disk drive rom
+      description: |
+        With this command a new drive ROM can be loaded into the selected drive.
+        The ROM file is passed as a binary file attachment to the POST request.<br>
+        The size of the ROM file needs to be 16K or 32K, depending on the drive type. 
+        
+        Loading the ROM is a temporary action, setting the drive type or rebooting the machine will load the default ROM.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            Load a new drive ROM in drive `a` or `b`.
+            The size of the ROM file needs to be 16K or 32K, depending on the drive type.
+            
+            Valid optons are one of the following: <br>
+            `a`, `b`
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: {}
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /drives/<drive>:set_mode:
+    put:
+      operationId: postSetMode
+      summary: Set or update disk image mode
+      description: |
+        Change the drive mode. The available values for the mode argument are `1541`, `1571` and `1581`. 
+        
+        Note that this command will also load the drive ROM. A temporary ROM that was loaded using the ‘load_rom’ 
+        command will be lost.
+      tags:
+        - Floppy drives
+      parameters:
+        - in: query
+          name: mod
+          schema:
+            type: string
+          required: true
+          description: |-
+            Load a new drive ROM in drive `a` or `b`.
+            The size of the ROM file needs to be 16K or 32K, depending on the drive type.
+            
+            Valid optons are one of the following: <br>
+            `a`, `b`
+      requestBody:
+        content:
+          application/octet-stream:
+            schema: {}
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /streams/{stream name}:start:
+    put:
+      operationId: putStartDataStream
+      summary: Start data stream
+      description: |
+        Use this command to start one of the available streams. Valid stream names 
+        are `video`, `audio` and `debug`. The IP number parameter is required for the 
+        U64 to know where to send the stream to. The default port number that the 
+        data stream is sent to is 11000 for the video stream, 11001 for the audio stream 
+        and 11002 for the debug stream. 
+        
+        A custom port number can be added to the IP address, after a colon separator; 
+        e.g. 192.168.178.224:6789 . Note that turning on the video stream will automatically 
+        turn off the debug stream.
+
+        More information about the [data streams](https://1541u-documentation.readthedocs.io/en/latest/api/api_calls.html#data-streams-u64-only).
+      tags:
+        - Data Streams (U64 only)
+      parameters:
+        - in: query
+          name: ip
+          schema:
+            type: string
+            default: 192.168.64.154
+          required: true
+          description: |-
+            The IP adress of the receiving host. This is the computer where you run software like 
+            [u64view](https://github.com/DusteDdk/u64view) (multiplatform or ... link to the window app)
+        - in: path
+          description: |
+            Video stream names.
+            Valid values are: `video`, `audio` and `debug`.
+          name: stream name
+          required: true
+          schema:
+            type: string
+            default: video
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                "Requires paramater ip":
+                  value: |-
+                    {
+                      "errors": [
+                        "Function start requires parameter ip"
+                      ]
+                    }
+                "No stream name given":
+                  value: |-
+                    {
+                      "errors": [
+                        "No stream name given in path"
+                      ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              examples:
+                "Network Host Resolve Error":
+                  value:
+                    {
+                      "errors": [ "Network Host Resolve Error" ]
+                    }
+                "Unrecognized stream name":
+                  value:
+                    {
+                      "errors": [ "Unrecognized stream name 'vdeo'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /streams/{streamname}:stop:
+    put:
+      operationId: putStopDataStream
+      summary: Turn off data stream
+      description: |
+        Turn off a data stream. Valid stream names are `video`, `audio` and `debug`.
+
+        More information about the [data streams](https://1541u-documentation.readthedocs.io/en/latest/api/api_calls.html#data-streams-u64-only).
+      tags:
+        - Data Streams (U64 only)
+      parameters:
+        - in: path
+          description: |
+            Video stream names.
+            Valid values are: `video`, `audio` and `debug`.
+          name: streamname
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Requires paramater ip:
+                  value: |-
+                    {
+                      "errors": [
+                        "Function start requires parameter ip"
+                      ]
+                    }
+                "No stream name given":
+                  value: |-
+                    {
+                      "errors": [
+                        "No stream name given in path"
+                      ]
+                    }
+                "Unrecognized stream name":
+                  value: |-
+                    { 
+                      "errors" : [ "Unrecognized stream name 'vdeo'" ]
+                    }
+  /configs:
+    get:
+      operationId: GetConfigCategories
+      summary: Retreive config categories
+      description: |
+        This command obtains a list of all the configuration categories in the Ultimate application. Note that 
+        there is no path specified after ‘configs’.
+      tags:
+        - Configuration
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "categories": [
+                        "Audio Mixer",
+                        "UltiSID Configuration",
+                        "C64 and Cartridge Settings",
+                        "Clock Settings",
+                        "Network settings",
+                        "Modem Settings",
+                        "LED Strip Settings",
+                        "Data Streams",
+                        "SoftIEC Drive Settings",
+                        "Printer Settings",
+                        "User Interface Settings",
+                        "Tape Settings",
+                        "Drive A Settings",
+                        "Drive B Settings"
+                      ],
+                        "errors": []
+                      }
+                OK (U64-only):
+                  value: |-
+                    {
+                      "categories": [
+                        "Audio Mixer",
+                        "SID Sockets Configuration",
+                        "UltiSID Configuration",
+                        "SID Addressing",
+                        "C64 and Cartridge Settings",
+                        "U64 Specific Settings",
+                        "Clock Settings",
+                        "Network settings",
+                        "WiFi settings",
+                        "Modem Settings",
+                        "LED Strip Settings",
+                        "Data Streams",
+                        "SoftIEC Drive Settings",
+                        "Printer Settings",
+                        "User Interface Settings",
+                        "Tape Settings",
+                        "Drive A Settings",
+                        "Drive B Settings"
+                      ],
+                        "errors": []
+                      }
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Endpoint not found
+    post:
+      operationId: postConfig
+      summary: Configure multiple configuration settings
+      description: |
+        With this command, many configuration settings can be changed at once. The format of the data that is passed should be JSON. It follows the same format as what is returned with the GET verb with at least one level in the path. The JSON should be an object, with the category strings at its first level, the configuration items in the second level, followed by the value. <br>
+      tags:
+        - Configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                "Drive A Settings":
+                  type: object
+                  properties:
+                    Drive:
+                      type: string
+                      enum: [ "Enabled", "Disabled" ]
+                    "Drive Type":
+                      type: integer
+                    "Drive Bus ID":
+                      type: integer
+                "Drive B Settings":
+                  type: object
+                  properties:
+                    Drive:
+                      type: string
+                      enum: [ "Enabled", "Disabled" ]
+              example:
+                "Drive A Settings":
+                  Drive: "Enabled"
+                  "Drive Type": 1581
+                  "Drive Bus ID": 8
+                "Drive B Settings":
+                  Drive: "Disabled"
+
+      responses:
+        '200':
+          description: OK
+  /configs/{category}:
+    get:
+      operationId: GetConfigCategoryItems
+      summary: Retreive config categories
+      description: |
+        This command obtains a list of all the configuration items in the category specified in the URL. Wildcards are allowed. Note that the depth of the specified path is 1. It specifies the category.
+        
+        For example: 
+        
+        ```GET /v1/configs/drive%20a*``` 
+        
+        returns:
+        
+        ```
+        {
+          "Drive A Settings": {
+            "Drive": "Enabled",
+            "Drive Type": "1541",
+            "Drive Bus ID": 8,
+            "ROM for 1541 mode": "1541.rom",
+            "ROM for 1571 mode": "1571.rom",
+            "ROM for 1581 mode": "1581.rom",
+            "Extra RAM": "Disabled",
+            "Disk swap delay": 1,
+            "Resets when C64 resets": "Yes",
+            "Freezes in menu": "Yes",
+            "GCR Save Align Tracks": "Yes",
+            "Leave Menu on Mount": "Yes"
+          },
+          "errors": []
+        }
+        ```
+      tags:
+        - Configuration
+      parameters:
+        - in: path
+          name: category
+          description: |
+            Configuration categories.
+            
+            Valid category values are:
+            
+            * Audio Mixer
+            * SID Sockets Configuration  -  U64 only
+            * UltiSID Configuration
+            * SID Addressing  -  U64 only
+            * C64 and Cartridge Settings
+            * U64 Specific Settings  -  U64 only
+            * Clock Settings
+            * Network settings
+            * WiFi settings  -  U64 only
+            * Modem Settings
+            * LED Strip Settings
+            * Data Streams  -  U64 only
+            * SoftIEC Drive Settings
+            * Printer Settings
+            * User Interface Settings
+            * Tape Settings
+            * Drive A Settings
+            * Drive B Settings
+            
+            Wildcards are allowed. Use the wildcard * (asterisk) to retrieve the values for all categories at once..
+          required: true
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "Audio Mixer": {
+                        "Vol UltiSid 1": "OFF",
+                        "Vol UltiSid 2": "OFF",
+                        "Vol Socket 1": "+5 dB",
+                        "Vol Socket 2": "OFF",
+                        "Vol Sampler L": "OFF",
+                        "Vol Sampler R": "OFF",
+                        "Vol Drive 1": "OFF",
+                        "Vol Drive 2": "OFF",
+                        "Vol Tape Read": "OFF",
+                        "Vol Tape Write": "OFF",
+                        "Pan UltiSID 1": "Center",
+                        "Pan UltiSID 2": "Center",
+                        "Pan Socket 1": "Left 3",
+                        "Pan Socket 2": "Right 3",
+                        "Pan Sampler L": "Left 3",
+                        "Pan Sampler R": "Right 3",
+                        "Pan Drive 1": "Left 2",
+                        "Pan Drive 2": "Right 2",
+                        "Pan Tape Read": "Center",
+                        "Pan Tape Write": "Center"
+                      },
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Endpoint not found
+  /configs/{category}/{item}:
+    get:
+      operationId: GetConfigCategoryItemValues
+      summary: Retreive config categories
+      description: |
+        This command obtains a list of all the configuration categories in the Ultimate application. Note that 
+        there is no path specified after ‘configs’.
+      tags:
+        - Configuration
+      parameters:
+        - in: path
+          name: category
+          description: |
+            Video stream names.
+            Valid values are: `video`, `audio` and `debug`.
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: item
+          description: |
+            Video stream names.
+            Valid values are: `video`, `audio` and `debug`.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "Audio Mixer": {
+                        "Vol UltiSid 1": {
+                          "current": "OFF",
+                          "values": [
+                            "OFF",
+                            "+6 dB",
+                            "+5 dB",
+                            "+4 dB",
+                            "+3 dB",
+                            "+2 dB",
+                            "+1 dB",
+                            " 0 dB",
+                            "-1 dB",
+                            "-2 dB",
+                            "-3 dB",
+                            "-4 dB",
+                            "-5 dB",
+                            "-6 dB",
+                            "-7 dB",
+                            "-8 dB",
+                            "-9 dB",
+                            "-10 dB",
+                            "-11 dB",
+                            "-12 dB",
+                            "-13 dB",
+                            "-14 dB",
+                            "-15 dB",
+                            "-16 dB",
+                            "-17 dB",
+                            "-18 dB",
+                            "-24 dB",
+                            "-27 dB",
+                            "-30 dB",
+                            "-36 dB",
+                            "-42 dB"
+                          ],
+                          "default": " 0 dB"
+                        }
+                      },
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: Endpoint not found
+    put:
+      operationId: putConfigCategoryItem
+      summary: Change configuration
+      description: |
+        This command sets a specific configuration item to the value specified in the URL, using the value argument. It is required to specify the full path to the item, although wildcards are allowed.<br>
+        
+        Example: ```PUT /v1/configs/drive%20a*/*bus*?value=9``` will set the ‘Drive Bus ID’ of ‘Drive A Settings’ to 9.
+      tags:
+        - Configuration
+      parameters:
+        - in: path
+          description: |
+            Category name.<br>
+            
+              Possible values are: <br>
+               `Audio Mixer` <br>
+               `SID Sockets Configuration` (U64 only) <br>
+               `UltiSID Configuration` <br>
+               `SID Addressing` (U64 only) <br>
+               `C64 and Cartridge` Settings <br>
+               `U64 Specific Settings` (U64 only) <br>
+               `Clock Settings` <br>
+               `Network settings` <br>
+               `WiFi settings` (U64 only) <br>
+               `Modem Settings` <br>
+               `LED Strip Settings` <br>
+               `Data Streams` <br>
+               `SoftIEC Drive Settings` <br>
+               `Printer Settings` <br>
+               `User Interface Settings` <br>
+               `Tape Settings` <br>
+               `Drive A Settings` <br>
+               `Drive B Settings`<br>
+               <br>
+               Use /configs to retreive all available config category values.
+          name: category
+          required: true
+          schema:
+            type: string
+        - in: path
+          description: |
+            Item name
+          name: item
+          required: true
+          schema:
+            type: string
+        - in: query
+          description: |
+            New value
+          name: value
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              examples:
+                OK:
+                  value: |-
+                    {
+                      "errors": []
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              examples:
+                Invalid drive:
+                  value: |-
+                    {
+                      "errors": [ "Invalid Drive 'c'" ]
+                    }
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+  /configs:load_from_flash:
+    put:
+      operationId: PutConfigFromFlash
+      summary: Load configuration file from flash
+      description: |
+        With this command, the complete configuration is restored to what is currently written in non-volatile memory. In other words: the ‘saved’ values are loaded into the current configuration.
+        
+        **Plese note:** This request will receive an "connection reset by peer" instead of an HTTP status code.
+      tags:
+        - Configuration
+      responses:
+        '200':
+          description: OK
+  /configs:save_to_flash:
+    put:
+      operationId: putSaveToFlash
+      summary: Save configuration chto flash
+      description: |
+        With this command, the complete configuration is written to non-volatile memory. In other words: the current configuration settings are ‘saved’ and will be loaded once the machine boots.
+      tags:
+      - Configuration
+      responses:
+        '200':
+          description: OK
+  /configs:reset_to_default:
+    put:
+      operationId: putResetToDefault
+      summary: Reset the configuration to default
+      description: |
+        This command resets the current settings to the factory default. This does not clear or reset the values stored in non-volatile memory.
+      tags:
+      - Configuration
+      responses:
+        '200':
+          description: OK
+  /files/{path}:info:
+    get:
+      operationId: getFileInfo
+      summary: Get file information
+      description: |
+        This command returns basic information about a file, like size and extension. It simply performs an ‘fstat’. Supports wildcards. Unfinished
+      tags:
+        - Files
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+          example: "/Temp/diskimage.d64"
+          description: |-
+            The path to the folder where the disk image will be created.
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                'File information - d64':
+                  value: |-
+                    {
+                      "files": {
+                        "path": "/Temp/diskimage.d64",
+                        "filename": "diskimage.d64",
+                        "size": 174848,
+                        "extension": "D64"
+                      },
+                      "errors": []
+                    }
+                'File information - d71':
+                  value: |-
+                    {
+                      "files": {
+                        "path": "/Temp/diskimage.d71",
+                        "filename": "diskimage.d71",
+                        "size": 349696,
+                        "extension": "D71"
+                      },
+                      "errors": []
+                    }
+                'File information - d81':
+                  value: |-
+                    {
+                      "files": {
+                        "path": "/Temp/diskimage.d81",
+                        "filename": "diskimage.d81",
+                        "size": 819200,
+                        "extension": "D81"
+                      },
+                      "errors": []
+                    }
+                'Directory information':
+                  value: |-
+                    {
+                      "files": {
+                        "path": "Temp",
+                        "filename": "",
+                        "size": 0,
+                        "extension": ""
+                      },
+                      "errors": []
+                    }
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+              examples:
+                "Require parameter tracks":
+                  value: |-
+                    {
+                      "errors" : [ "Function create_dnp requires parameter tracks" ]
+                    }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+              examples:
+                FILE DOESN'T EXIST:
+                  value: |-
+                    {
+                      "errors": [
+                        "FILE DOESN'T EXIST"
+                      ]
+                    }
+  /files/{path}:create_d64:
+    put:
+      operationId: CreateD64Image
+      summary: Create d64 disk image on the device's filesystem
+      description: |
+        With this command a .d64 file can be created. The full path shall be specified from the root of the file system, including the file to be created. The default number of tracks is 35, but it can also be set to 40. The optional diskname argument overrides the name to be used in the header of the disk. When not given, it is taken from the name of the file that is being created.
+      tags:
+        - Files
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+          example: "/Temp/diskimage.d64"
+          description: |-
+            The path to the folder where the disk image will be created and disk image name. Make sure to include
+            the .d64 extension..
+        - in: query
+          description: |
+            Number of tracks
+          name: tracks
+          required: false
+          schema:
+            type: integer
+            enum: [35, 40]
+            default: 35
+        - in: query
+          description: |
+            The disk image name
+          name: diskname
+          required: false
+          example: "-= scs+trc 2024 =-"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+                    example: "/Temp/diskimage.d64"
+                  tracks:
+                    type: integer
+                    enum: [35, 40]
+                    default: 35
+                  diskname:
+                    type: string
+                    example: "-= scs+trc 2024 =-"
+                  bytes_written:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                "Successful operation D64 - 35 tracks":
+                  value: |-
+                    {
+                      "path": "/Temp/diskimage.d64",
+                      "tracks": 35,
+                      "diskname": "-= scs+trc 2024 =-",
+                      "bytes_written": 174848,
+                      "errors": []
+                    }
+                "Successful operation D64 - 40 tracks":
+                  value: |-
+                    {
+                      "path": "/Temp/diskimage.d64",
+                      "tracks": 40,
+                      "diskname": "-= scs+trc 2024 =-",
+                      "bytes_written": 196608,
+                      "errors": []
+                    }
+#        '400':
+#          description: "Bad request"
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  errors:
+#                    type: array
+#              examples:
+#                "Require parameter tracks":
+#                  value: |-
+#                    {
+#                      "errors" : [ "Function create_d64 requires parameter tracks" ]
+#                    }
+#        409:
+#          description: Conflict
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  status:
+#                    type: string
+#                  error:
+#                    type: string
+#                  path:
+#                    type: string
+#                  tracks:
+#                    type: integer
+#                  diskname:
+#                    type: string
+#                  message:
+#                    type: string
+#              examples:
+#                "File exists":
+#                  value: |-
+#                    {
+#                      "status": 409,
+#                      "error": "Conflict",
+#                      "path" : "/Temp/diskimage.dnp",
+#                      "tracks" : 255,
+#                      "diskname" : "-= scs+trc 2024 =-",
+#                      "message" : "A file with the same name already exists. Please choose a different name."
+#                    }
+        '500':
+          description: "Error: Internal Server Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                "File exists":
+                  value: |-
+                    {
+                      "path": "/Temp/diskimage.d64",
+                      "tracks": 35,
+                      "diskname": "-= scs+trc 2024 =-",
+                      "errors": [
+                        "FILE EXISTS"
+                      ]
+                    }
+  /files/{path}:create_d71:
+    put:
+      operationId: CreateD71Image
+      summary: Create d71 disk image on the device's filesystem
+      description: |
+        With this command a .d71 file can be created. The full path shall be specified from the root of the file system, including the file to be created. The number of tracks is fixed at 70. The optional diskname argument overrides the name to be used in the header of the disk. When not given, it is taken from the name of the file that is being created.
+      tags:
+        - Files
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+          example: "/Temp/diskimage.d71"
+          description: |-
+            The path to the folder where the disk image will be created and disk image name. Make sure to include
+            the .d71 extension.
+        - in: query
+          description: |
+            The directory header name
+          name: diskname
+          required: false
+          schema:
+            type: string
+            example: "-= scs+trc 2024 =-"
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                'Successful operation':
+                  value: |-
+                    {
+                      "path": "/Temp/diskimage.d71",
+                      "tracks": 70,
+                      "diskname": "-= scs+trc 2024 =-",
+                      "bytes_written": 349696,
+                      "errors": []
+                    }
+#        '400':
+#          description: "Bad request"
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  errors:
+#                    type: array
+#              examples:
+#                "Require parameter tracks":
+#                  value: |-
+#                    {
+#                      "errors" : [ "Function create_d71 requires parameter tracks" ]
+#                    }
+        '500':
+          description: "Error: Internal Server Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                "File exists":
+                  value: |-
+                    { 
+                      "path" : "/Temp/diskimage.d71",
+                      "tracks" : 70,
+                      "diskname" : "-= scs+trc 2024 =-",
+                      "errors" : [ "FILE EXISTS" ]
+                    }
+  /files/{path}:create_d81:
+    put:
+      operationId: CreateD81Image
+      summary: Create d81 disk image on the device's filesystem
+      description: |
+        With this command a .d81 file can be created. The full path shall be specified from the root of the file system, including the file to be created. The number of tracks is fixed at 160 (80 on each side). The optional diskname argument overrides the name to be used in the header of the disk. When not given, it is taken from the name of the file that is being created.
+      tags:
+        - Files
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+          example: "/Temp/diskimage.d81"
+          description: |-
+            The path to the folder where the disk image will be created and disk image name. Make sure to include
+            the .d81 extension.
+        - in: query
+          description: |
+            The directory header name
+          name: diskname
+          required: false
+          schema:
+            type: string
+            example: -= scs+trc =-
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                'Successful operation':
+                  value: |-
+                    {
+                      "path": "/Temp/diskimage.d81",
+                      "diskname": "scs+trc",
+                      "bytes_written": 819200,
+                      "errors": []
+                    }
+        '500':
+          description: "Error: Internal Server Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                "File exists":
+                  value: |-
+                    {
+                      "path": "Temp/diskimage.d81",
+                      "diskname": "diskimage",
+                      "errors": [
+                        "FILE EXISTS"
+                      ]
+                    }
+  /files/{path}:create_dnp:
+    put:
+      operationId: CreateDNPImage
+      summary: Create DNP disk image on the device's filesystem
+      description: |
+        With this command a .dnp file can be created. The full path shall be specified from the root of the file system, including the file to be created. The number of tracks is a required argument to this function. Each track will have 256 sectors. The maximum number of tracks is 255, which makes the maximum DNP size almost 16 Megabytes. The optional diskname argument overrides the name to be used in the header of the disk. When not given, it is taken from the name of the file that is being created.
+      parameters:
+        - in: path
+          name: path
+          schema:
+            type: string
+          required: true
+          example: "/Temp/diskimage.dnp"
+          description: |-
+            The path to the folder where the disk image will be created and disk image name. Make sure to include
+            the .dnp extension.
+        - in: query
+          description: |
+            Number of tracks
+          name: tracks
+          required: true
+          schema:
+            type: string
+            minimum: 1
+            maximum: 255
+          example: "255"
+        - in: query
+          description: |
+            The directory header name
+          name: diskname
+          required: false
+          schema:
+            type: string
+            example: "-= scs+trc 2024 =-"
+      tags:
+        - Files
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  path:
+                    type: string
+                    example: "/Temp/diskimage.dnp"
+                  tracks:
+                      type: integer
+                      minimum: 1
+                      maximum: 255
+                      example: 255
+                  diskname:
+                    type: string
+                    example: "scs+trc 2024"
+                  bytes_written:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                "Succesful operation":
+                  value: |-
+                    {
+                      "path": "/Temp/diskimage.dnp",
+                      "tracks": 255,
+                      "diskname": "-= scs+trc 2024 =-",
+                      "bytes_written": 16711680,
+                      "errors": []
+                    }
+        '400':
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+              examples:
+                "Requires parameter tracks":
+                  value: |-
+                    {
+                      "errors" : [ "Function create_dnp requires parameter tracks" ]
+                    }
+#        409:
+#          description: Conflict
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  status:
+#                    type: string
+#                  error:
+#                    type: string
+#                  path:
+#                    type: string
+#                  tracks:
+#                    type: integer
+#                  diskname:
+#                    type: string
+#                  message:
+#                    type: string
+#              examples:
+#                "File exists":
+#                  value: |-
+#                    {
+#                      "status": 409,
+#                      "error": "Conflict",
+#                      "path" : "/Temp/diskimage.dnp",
+#                      "tracks" : 255,
+#                      "diskname" : "-= scs+trc 2024 =-",
+#                      "message" : "A file with the same name already exists. Please choose a different name."
+#                    }
+        '500':
+          description: "Error: Internal Server Error"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: string
+              examples:
+                "File exists":
+                  value: |-
+                    {
+                      "path": "/Temp/diskimage.dnp",
+                      "tracks": 255,
+                      "diskname": "-= scs+trc 2024 =-",
+                      "errors": [
+                        "FILE EXISTS"
+                      ]
+                    }
