@@ -186,7 +186,7 @@ paths:
           name: length
           required: false
           schema:
-            type: string
+            type: integer
             default: 256
             minimum: 0
             example: 128
@@ -2826,7 +2826,7 @@ paths:
           name: tracks
           required: true
           schema:
-            type: string
+            type: integer
             minimum: 1
             maximum: 255
           example: "255"
