@@ -2475,6 +2475,8 @@ paths:
                 properties:
                   errors:
                     type: array
+                    items:
+                      type: string
               examples:
                 "Require parameter tracks":
                   value: |-
@@ -2490,6 +2492,8 @@ paths:
                 properties:
                   errors:
                     type: array
+                    items:
+                      type: string
               examples:
                 FILE DOESN'T EXIST:
                   value: |-
@@ -2880,6 +2884,8 @@ paths:
                 properties:
                   errors:
                     type: array
+                    items:
+                      type: string
               examples:
                 "Requires parameter tracks":
                   value: |-
