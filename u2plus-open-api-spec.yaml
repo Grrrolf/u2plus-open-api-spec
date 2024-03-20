@@ -186,7 +186,7 @@ paths:
           name: length
           required: false
           schema:
-            type: string
+            type: integer
             default: 256
             minimum: 0
             example: 128
@@ -2475,6 +2475,8 @@ paths:
                 properties:
                   errors:
                     type: array
+                    items:
+                      type: string
               examples:
                 "Require parameter tracks":
                   value: |-
@@ -2490,6 +2492,8 @@ paths:
                 properties:
                   errors:
                     type: array
+                    items:
+                      type: string
               examples:
                 FILE DOESN'T EXIST:
                   value: |-
@@ -2822,7 +2826,7 @@ paths:
           name: tracks
           required: true
           schema:
-            type: string
+            type: integer
             minimum: 1
             maximum: 255
           example: "255"
@@ -2880,6 +2884,8 @@ paths:
                 properties:
                   errors:
                     type: array
+                    items:
+                      type: string
               examples:
                 "Requires parameter tracks":
                   value: |-
