@@ -12,7 +12,7 @@ servers:
     variables:
       host:
         default: 192.168.64.176
-        description: Enter the host name or IP-address of your Ultimate devivce.
+        description: Enter the host name or IP-address of your Ultimate device.
       basePath:
         default: v1
 paths:
@@ -138,7 +138,7 @@ paths:
             application/json: { }
   /machine:poweroff:
     put:
-      operationId: poweroffMachine
+      operationId: powerOffMachine
       summary: Power off machine
       description: |-
         This U64-only command causes the machine to power off. Note that it is likely that you won’t receive a 
@@ -168,7 +168,7 @@ paths:
         * The address argument specifies the memory location in hexadecimal format. 
         * The optional argument length specifies the number of bytes being read. 
         * When the length is not specified, 256 bytes are returned.
-        * The length speficied should not exceed memory address location $FFFF
+        * The length specified should not exceed memory address location $FFFF
       tags:
         - Machine operations
       parameters:
@@ -233,8 +233,8 @@ paths:
         so the memory map that is currently selected is used. Writing to the I/O registers of the 6510 is not 
         possible. 
         
-        Data bytes are written in consequetive memory locations. The address argument specifies the memory location in 
-        hexadecimal format. The data argument contains a string of bytes in hexadecimal format. The maxmimum number of 
+        Data bytes are written in consecutive memory locations. The address argument specifies the memory location in 
+        hexadecimal format. The data argument contains a string of bytes in hexadecimal format. The maximum number of 
         bytes written with this method is 128.
 
         Example: "PUT /v1/machine:writemem?address=D020&data=0'504'" the values result in 05 being written to $D020 and 
@@ -369,7 +369,7 @@ paths:
           description: Not Found
   /machine:debugreg:
     get:
-      operationId: readDebugRestiger
+      operationId: readDebugRegister
       summary: Read debug register
       description: |
         This command reads the debug register ($D7FF) and returns it in the “value” field of the JSON response. 
@@ -398,7 +398,7 @@ paths:
         '404':
           description: Not Found
     put:
-      operationId: writeDebugRestiger
+      operationId: writeDebugRegister
       summary: Write to debug register
       description: |
         This command writes the value specified by the value argument (in hexadecimal) into the debug register ($D7FF), 
@@ -808,7 +808,7 @@ paths:
       operationId: putRunPrg
       summary: Load a programme file from the U2+'s file system
       description: |
-        With this command a progam can be loaded into memory. The file argument points to an existing 
+        With this command a program can be loaded into memory. The file argument points to an existing 
         file in the file system of the Ultimate. The machine resets, and loads the designated program 
         into memory using DMA. Then it automatically runs the program.
       tags:
@@ -866,7 +866,7 @@ paths:
       operationId: postLoadPrg
       summary: Send and load a programme file
       description: |
-        With this command a progam can be loaded into memory. The machine resets, and loads the attached program into 
+        With this command a program can be loaded into memory. The machine resets, and loads the attached program into 
         memory using DMA. It does not automatically run the program.
       tags:
         - Runners
@@ -924,7 +924,7 @@ paths:
       operationId: putRunCrt
       summary: Load and run cartridge image file from the U2+'s file system
       description: |
-        With this command a progam can be loaded into memory. The file argument points to an existing file in the file 
+        With this command a program can be loaded into memory. The file argument points to an existing file in the file 
         system of the Ultimate. The machine resets, and loads the designated program into memory using DMA. It does not 
         automatically run the program.
       tags:
@@ -932,7 +932,7 @@ paths:
       parameters:
         - in: query
           description: |
-            Location and  name of the cartrige image file on your Ultimate device's storage
+            Location and  name of the cartridge image file on your Ultimate device's storage
           name: file
           required: true
           schema:
@@ -1127,7 +1127,7 @@ paths:
             The drive `a` or `b` the disk image will be mounted on.<br>
             _Please note that the disk drive does not have to be enabled to mount a disk._
 
-            Valid optons are one of the following:<br>
+            Valid options are one of the following:<br>
             `a`, `b`
         - in: query
           description: |
@@ -1138,7 +1138,7 @@ paths:
             type: string
         - in: query
           description: |-
-            The tpye or format of the disk image.<br>
+            The type or format of the disk image.<br>
             Valid options are one of the following:<br>
             `d64`, `g64`, `d71`, `g71` or `d81`
             
@@ -1150,7 +1150,7 @@ paths:
         - in: query
           description: |-
             The mode of operation for the disk image. 
-            <br>Valdid options are one of the following:<br>
+            <br>Valid options are one of the following:<br>
             `readwrite`, `readonly` or `unlinked`
 
             When this parameter is omitted, then the API will mount the disk as `readwrite`
@@ -1245,11 +1245,11 @@ paths:
             The drive `a` or `b` the disk image will be mounted on.<br>
             _Please note that the disk drive does not have to be enabled to mount a disk._
 
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
         - in: query
           description: |-
-            The tpye or format of the disk image.<br>
+            The type or format of the disk image.<br>
             Valid options are one of the following:<br>
             `d64`, `g64`, `d71`, `g71` or `d81`
             
@@ -1261,7 +1261,7 @@ paths:
         - in: query
           description: |-
             The mode of operation for the disk image. 
-            <br>Valdid options are one of the following:<br>
+            <br>Valid options are one of the following:<br>
             `readwrite`, `readonly` or `unlinked`
           name: mode
           required: false
@@ -1347,7 +1347,7 @@ paths:
           required: true
           description: |-
             The drive to be reset. <br>
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
       responses:
         '200':
@@ -1399,8 +1399,8 @@ paths:
             type: string
           required: true
           description: |-
-            Remove the mounted disk iamge from the drive.<br>
-            Valid optons are one of the following: <br>
+            Remove the mounted disk image from the drive.<br>
+            Valid options are one of the following: <br>
             `a`, `b`
       responses:
         '200':
@@ -1454,7 +1454,7 @@ paths:
           description: |-
             Beak the link between the drive and the mounted disk image file.
             Further writes will no longer be reflected in the image file.<br>
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
       responses:
         '200':
@@ -1507,7 +1507,7 @@ paths:
           required: true
           description: |-
             Enables disk drive `a` or `b`. When the drive was already on it is reset.<br>
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
       responses:
         '200':
@@ -1561,7 +1561,7 @@ paths:
           description: |-
             Disables disk drive `a` or `b`. It will no longer be accessible on the serial bus.
             
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
       responses:
         '200':
@@ -1600,7 +1600,7 @@ paths:
                       type: string
   /drives/{drive}:load_rom:
     put:
-      operationId: putLoaDrivedRom
+      operationId: putLoadDriveRom
       summary: Load drive rom
       description: |
         Loads a new disk drive ROM into the selected drive. <br>
@@ -1621,7 +1621,7 @@ paths:
             Load a new drive ROM in drive `a` or `b`.
             The size of the ROM file needs to be 16K or 32K, depending on the drive type.
             
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
         - in: query
           description: |
@@ -1686,7 +1686,7 @@ paths:
             Load a new drive ROM in drive `a` or `b`.
             The size of the ROM file needs to be 16K or 32K, depending on the drive type.
             
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
       requestBody:
         content:
@@ -1748,7 +1748,7 @@ paths:
             Load a new drive ROM in drive `a` or `b`.
             The size of the ROM file needs to be 16K or 32K, depending on the drive type.
             
-            Valid optons are one of the following: <br>
+            Valid options are one of the following: <br>
             `a`, `b`
       requestBody:
         content:
@@ -1815,7 +1815,7 @@ paths:
             default: 192.168.64.154
           required: true
           description: |-
-            The IP adress of the receiving host. This is the computer where you run software like 
+            The IP address of the receiving host. This is the computer where you run software like 
             [u64view](https://github.com/DusteDdk/u64view) (multiplatform or ... link to the window app)
         - in: path
           description: |
@@ -1849,7 +1849,7 @@ paths:
           content:
             application/json:
               examples:
-                "Requires paramater ip":
+                "Requires parameter ip":
                   value: |-
                     {
                       "errors": [
@@ -1934,7 +1934,7 @@ paths:
           content:
             application/json:
               examples:
-                Requires paramater ip:
+                Requires parameter ip:
                   value: |-
                     {
                       "errors": [
@@ -1956,7 +1956,7 @@ paths:
   /configs:
     get:
       operationId: GetConfigCategories
-      summary: Retreive config categories
+      summary: Retrieve config categories
       description: |
         This command obtains a list of all the configuration categories in the Ultimate application. Note that 
         there is no path specified after ‘configs’.
@@ -2071,7 +2071,7 @@ paths:
   /configs/{category}:
     get:
       operationId: GetConfigCategoryItems
-      summary: Retreive config categories
+      summary: Retrieve config categories
       description: |
         This command obtains a list of all the configuration items in the category specified in the URL. Wildcards are allowed. Note that the depth of the specified path is 1. It specifies the category.
         
@@ -2183,7 +2183,7 @@ paths:
   /configs/{category}/{item}:
     get:
       operationId: GetConfigCategoryItemValues
-      summary: Retreive config categories
+      summary: Retrieve config categories
       description: |
         This command obtains a list of all the configuration categories in the Ultimate application. Note that 
         there is no path specified after ‘configs’.
@@ -2303,7 +2303,7 @@ paths:
                `Drive A Settings` <br>
                `Drive B Settings`<br>
                <br>
-               Use /configs to retreive all available config category values.
+               Use /configs to retrieve all available config category values.
           name: category
           required: true
           schema:
@@ -2364,7 +2364,7 @@ paths:
       description: |
         With this command, the complete configuration is restored to what is currently written in non-volatile memory. In other words: the ‘saved’ values are loaded into the current configuration.
         
-        **Plese note:** This request will receive an "connection reset by peer" instead of an HTTP status code.
+        **Please note:** This request will receive an "connection reset by peer" instead of an HTTP status code.
       tags:
         - Configuration
       responses:
@@ -2373,7 +2373,7 @@ paths:
   /configs:save_to_flash:
     put:
       operationId: putSaveToFlash
-      summary: Save configuration chto flash
+      summary: Save configuration to flash
       description: |
         With this command, the complete configuration is written to non-volatile memory. In other words: the current configuration settings are ‘saved’ and will be loaded once the machine boots.
       tags:
@@ -2862,7 +2862,7 @@ paths:
                     items:
                       type: string
               examples:
-                "Succesful operation":
+                "Successful operation":
                   value: |-
                     {
                       "path": "/Temp/diskimage.dnp",
