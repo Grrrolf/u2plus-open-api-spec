@@ -1727,29 +1727,32 @@ paths:
                     type: array
                     items:
                       type: string
-  /drives/<drive>:set_mode:
+  /drives/{drive}:set_mode:
     put:
       operationId: postSetMode
       summary: Set or update disk image mode
       description: |
-        Change the drive mode. The available values for the mode argument are `1541`, `1571` and `1581`. 
+        Change the drive mode.
         
         Note that this command will also load the drive ROM. A temporary ROM that was loaded using the ‘load_rom’ 
         command will be lost.
       tags:
         - Floppy drives
       parameters:
+        - in: path
+          name: drive
+          schema:
+            type: string
+          required: true
+          description: |-
+            Valid options are one of the following: <br>
+            `a`, `b`
         - in: query
           name: mod
           schema:
             type: string
           required: true
-          description: |-
-            Load a new drive ROM in drive `a` or `b`.
-            The size of the ROM file needs to be 16K or 32K, depending on the drive type.
-            
-            Valid options are one of the following: <br>
-            `a`, `b`
+          description:  The available values are `1541`, `1571` and `1581`.
       requestBody:
         content:
           application/octet-stream:
@@ -1789,7 +1792,7 @@ paths:
                     type: array
                     items:
                       type: string
-  /streams/{stream name}:start:
+  /streams/{streamname}:start:
     put:
       operationId: putStartDataStream
       summary: Start data stream
@@ -1821,7 +1824,7 @@ paths:
           description: |
             Video stream names.
             Valid values are: `video`, `audio` and `debug`.
-          name: stream name
+          name: streamname
           required: true
           schema:
             type: string
