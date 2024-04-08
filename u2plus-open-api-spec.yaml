@@ -825,7 +825,7 @@ paths:
                 Undefined subsystem command:
                   value: |-
                     {
-                      "errors" : [ "Undefined subsystem command" ]
+                      "errors" : [ "Undefined subsystem command" ]x
                     }
         '507':
           description: Unknown
@@ -2377,51 +2377,6 @@ paths:
                       "bytes_written": 196608,
                       "errors": []
                     }
-#        '400':
-#          description: "Bad request"
-#          content:
-#            application/json:
-#              schema:
-#                type: object
-#                properties:
-#                  errors:
-#                    type: array
-#              examples:
-#                "Require parameter tracks":
-#                  value: |-
-#                    {
-#                      "errors" : [ "Function create_d64 requires parameter tracks" ]
-#                    }
-#        409:
-#          description: Conflict
-#          content:
-#            application/json:
-#              schema:
-#                type: object
-#                properties:
-#                  status:
-#                    type: string
-#                  error:
-#                    type: string
-#                  path:
-#                    type: string
-#                  tracks:
-#                    type: integer
-#                  diskname:
-#                    type: string
-#                  message:
-#                    type: string
-#              examples:
-#                "File exists":
-#                  value: |-
-#                    {
-#                      "status": 409,
-#                      "error": "Conflict",
-#                      "path" : "/Temp/diskimage.dnp",
-#                      "tracks" : 255,
-#                      "diskname" : "-= scs+trc 2024 =-",
-#                      "message" : "A file with the same name already exists. Please choose a different name."
-#                    }
         '500':
           description: "Error: Internal Server Error"
           content:
@@ -2488,21 +2443,6 @@ paths:
                       "bytes_written": 349696,
                       "errors": []
                     }
-#        '400':
-#          description: "Bad request"
-#          content:
-#            application/json:
-#              schema:
-#                type: object
-#                properties:
-#                  errors:
-#                    type: array
-#              examples:
-#                "Require parameter tracks":
-#                  value: |-
-#                    {
-#                      "errors" : [ "Function create_d71 requires parameter tracks" ]
-#                    }
         '500':
           description: "Error: Internal Server Error"
           content:
@@ -2669,36 +2609,6 @@ paths:
                     {
                       "errors" : [ "Function create_dnp requires parameter tracks" ]
                     }
-#        409:
-#          description: Conflict
-#          content:
-#            application/json:
-#              schema:
-#                type: object
-#                properties:
-#                  status:
-#                    type: string
-#                  error:
-#                    type: string
-#                  path:
-#                    type: string
-#                  tracks:
-#                    type: integer
-#                  diskname:
-#                    type: string
-#                  message:
-#                    type: string
-#              examples:
-#                "File exists":
-#                  value: |-
-#                    {
-#                      "status": 409,
-#                      "error": "Conflict",
-#                      "path" : "/Temp/diskimage.dnp",
-#                      "tracks" : 255,
-#                      "diskname" : "-= scs+trc 2024 =-",
-#                      "message" : "A file with the same name already exists. Please choose a different name."
-#                    }
         '500':
           description: "Error: Internal Server Error"
           content:
