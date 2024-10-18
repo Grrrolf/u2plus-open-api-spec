@@ -11,7 +11,7 @@ servers:
     description: U2+ REST API
     variables:
       host:
-        default: 192.168.1.176
+        default: 192.168.64.64
         description: Enter the host name or IP-address of your Ultimate device.
       basePath:
         default: v1
