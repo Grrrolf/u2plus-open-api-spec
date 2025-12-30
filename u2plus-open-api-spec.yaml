@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: U2+ REST API
   description: Starting from Ultimate firmware 3.11, the application supports
@@ -11,7 +11,7 @@ servers:
     description: U2+ REST API
     variables:
       host:
-        default: 192.168.64.176
+        default: 192.168.64.64
         description: Enter the host name or IP-address of your Ultimate device.
       basePath:
         default: v1
@@ -1933,24 +1933,24 @@ paths:
             
             Valid category values are:
             
-            * Audio Mixer
-            * SID Sockets Configuration  -  U64 only
-            * UltiSID Configuration
-            * SID Addressing  -  U64 only
-            * C64 and Cartridge Settings
-            * U64 Specific Settings  -  U64 only
-            * Clock Settings
-            * Network settings
-            * WiFi settings  -  U64 only
-            * Modem Settings
-            * LED Strip Settings
-            * Data Streams  -  U64 only
-            * SoftIEC Drive Settings
-            * Printer Settings
-            * User Interface Settings
-            * Tape Settings
-            * Drive A Settings
-            * Drive B Settings
+            * ```Audio Mixer```
+            * ```SID Sockets Configuration``` (U64 only)
+            * ```UltiSID Configuration```
+            * ```SID Addressing``` (U64 only)
+            * ```C64 and Cartridge Settings```
+            * ```U64 Specific Settings``` (U64 only)
+            * ```Clock Settings```
+            * ```Network settings```
+            * ```WiFi settings``` (U64 and U2+L + WiFi module only)
+            * ```Modem Settings```
+            * ```LED Strip Settings```
+            * ```Data Streams``` (U64 only)
+            * ```SoftIEC Drive Settings```
+            * ```Printer Settings```
+            * ```User Interface Settings```
+            * ```Tape Settings```
+            * ```Drive A Settings```
+            * ```Drive B Settings```
             
             Wildcards are allowed. Use the wildcard * (asterisk) to retrieve the values for all categories at once..
           required: true
