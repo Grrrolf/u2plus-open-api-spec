@@ -1,0 +1,905 @@
+openapi: 3.1.0
+info:
+  title: 1541 Ultimate REST API
+  description: This document describes the REST API for the 1541 Ultimate-II+ and Ultimate 64 firmware. It provides endpoints for controlling the machine, managing drives, accessing files, and configuring the device. The API follows a `/v1/{route}/{path}:{command}` structure.
+  version: "1.0"
+servers:
+  - url: http://{ultimate_ip}/api/v1
+    description: The local API endpoint for the Ultimate device.
+    variables:
+      ultimate_ip:
+        default: "192.168.1.64"
+        description: "The IP address of your Ultimate device on the local network."
+components:
+  securitySchemes:
+    passwordHeader:
+      type: apiKey
+      in: header
+      name: X-Password
+      description: "The API password, if one is configured in the Network Settings."
+security:
+  - passwordHeader: []
+tags:
+  - name: General
+    description: General device information endpoints.
+  - name: Runners
+    description: Endpoints for directly running programs, cartridges, and media files.
+  - name: Machine Control
+    description: Endpoints for controlling the state of the emulated C64.
+  - name: Drives
+    description: Endpoints for managing virtual disk drives.
+  - name: Files
+    description: Endpoints for filesystem operations.
+  - name: Configuration
+    description: Endpoints for managing device settings.
+  - name: Streams
+    description: Endpoints for starting and stopping data streams.
+paths:
+  /version:
+    get:
+      tags:
+        - General
+      summary: Get API Version
+      description: Returns the version of the REST API.
+      operationId: get_version
+      responses:
+        '200':
+          description: OK
+  /info:
+    get:
+      tags:
+        - General
+      summary: Get Device Information
+      description: Returns general information about the Ultimate device, including firmware version, FPGA version, and hostname.
+      operationId: get_info
+      responses:
+        '200':
+          description: OK
+  /runners:sidplay:
+    put:
+      tags:
+        - Runners
+      summary: Play a SID tune from a path
+      description: Plays a SID music file from a given path on the device's storage.
+      operationId: runners_sidplay_put
+      parameters:
+        - name: file
+          in: query
+          required: true
+          description: The full path to the SID file on the device's storage.
+          schema:
+            type: string
+        - name: song
+          in: query
+          required: false
+          description: The song number to play from the SID file.
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Runners
+      summary: Upload and play a SID tune
+      description: Uploads a SID music file and immediately plays it.
+      operationId: runners_sidplay_post
+      parameters:
+        - name: song
+          in: query
+          required: false
+          description: The song number to play from the SID file.
+          schema:
+            type: integer
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+  /runners:modplay:
+    put:
+      tags:
+        - Runners
+      summary: Play a MOD file from a path
+      description: Plays a ProTracker MOD file from a given path on the device's storage.
+      operationId: runners_modplay_put
+      parameters:
+        - name: file
+          in: query
+          required: true
+          description: The full path to the MOD file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Runners
+      summary: Upload and play a MOD file
+      description: Uploads a ProTracker MOD file and immediately plays it.
+      operationId: runners_modplay_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+  /runners:load_prg:
+    put:
+      tags:
+        - Runners
+      summary: Load a PRG file from a path
+      description: Loads a C64 program (.prg) file into memory from a given path.
+      operationId: runners_load_prg_put
+      parameters:
+        - name: file
+          in: query
+          required: true
+          description: The full path to the PRG file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Runners
+      summary: Upload and load a PRG file
+      description: Uploads a C64 program (.prg) file and loads it into memory.
+      operationId: runners_load_prg_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+  /runners:run_prg:
+    put:
+      tags:
+        - Runners
+      summary: Run a PRG file from a path
+      description: Loads and immediately runs a C64 program (.prg) file from a given path.
+      operationId: runners_run_prg_put
+      parameters:
+        - name: file
+          in: query
+          required: true
+          description: The full path to the PRG file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Runners
+      summary: Upload and run a PRG file
+      description: Uploads a C64 program (.prg) file, loads it into memory, and runs it.
+      operationId: runners_run_prg_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+  /runners:run_crt:
+    put:
+      tags:
+        - Runners
+      summary: Run a CRT file from a path
+      description: Mounts and runs a C64 cartridge (.crt) file from a given path.
+      operationId: runners_run_crt_put
+      parameters:
+        - name: file
+          in: query
+          required: true
+          description: The full path to the CRT file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Runners
+      summary: Upload and run a CRT file
+      description: Uploads a C64 cartridge (.crt) file and runs it.
+      operationId: runners_run_crt_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+  /machine:menu_button:
+    put:
+      tags:
+        - Machine Control
+      summary: "Press the Menu Button"
+      description: "Simulates a press of the physical menu button on the device, which typically enters the Ultimate's main menu."
+      operationId: "machine_menu_button"
+      responses:
+        '200':
+          description: "OK"
+  /machine:reset:
+    put:
+      tags:
+        - Machine Control
+      summary: "Reset the C64"
+      description: "Performs a hard reset of the emulated C64."
+      operationId: "machine_reset"
+      responses:
+        '200':
+          description: "OK"
+  /machine:reboot:
+    put:
+      tags:
+        - Machine Control
+      summary: "Reboot the Ultimate Device"
+      description: "Performs a full reboot of the Ultimate device itself, not just the C64 emulation."
+      operationId: "machine_reboot"
+      responses:
+        '200':
+          description: "OK"
+  /machine:pause:
+    put:
+      tags:
+        - Machine Control
+      summary: "Pause the C64"
+      description: "Pauses the C64's CPU, effectively freezing the machine in its current state."
+      operationId: "machine_pause"
+      responses:
+        '200':
+          description: "OK"
+  /machine:resume:
+    put:
+      tags:
+        - Machine Control
+      summary: "Resume the C64"
+      description: "Resumes the C64's CPU if it was previously paused."
+      operationId: "machine_resume"
+      responses:
+        '200':
+          description: "OK"
+  /machine:poweroff:
+    put:
+      tags:
+        - Machine Control
+      summary: "Power Off the C64"
+      description: "Powers off the emulated C64."
+      operationId: "machine_poweroff"
+      responses:
+        '200':
+          description: "OK"
+  /machine:writemem:
+    put:
+      tags:
+        - Machine Control
+      summary: "Write to C64 Memory"
+      description: "Directly writes a block of data to a specific memory address within the C64. This is a powerful debugging tool. The data should be provided as a hexadecimal string."
+      operationId: "machine_writemem_put"
+      parameters:
+        - name: "address"
+          in: "query"
+          required: true
+          description: "The starting memory address in hexadecimal format (e.g., 'C000')."
+          schema:
+            type: "string"
+        - name: "data"
+          in: "query"
+          required: true
+          description: "The data to write, encoded as a continuous hexadecimal string (e.g., 'A9018D00D0')."
+          schema:
+            type: "string"
+      responses:
+        '200':
+          description: "OK"
+    post:
+      tags:
+        - Machine Control
+      summary: "Write to C64 Memory from File"
+      description: "Writes the content of an uploaded binary file to a specific memory address within the C64."
+      operationId: "machine_writemem_post"
+      parameters:
+        - name: "address"
+          in: "query"
+          required: true
+          description: "The starting memory address in hexadecimal format (e.g., '0801')."
+          schema:
+            type: "string"
+      requestBody:
+        description: "The binary data to write to memory."
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: "object"
+              properties:
+                file:
+                  type: "string"
+                  format: "binary"
+      responses:
+        '200':
+          description: "OK"
+  /machine:readmem:
+    get:
+      tags:
+        - Machine Control
+      summary: "Read from C64 Memory"
+      description: "Reads a block of data from a specific memory address within the C64 and returns it as a binary stream."
+      operationId: "machine_readmem"
+      parameters:
+        - name: "address"
+          in: "query"
+          required: true
+          description: "The starting memory address in hexadecimal format (e.g., 'D020')."
+          schema:
+            type: "string"
+        - name: "length"
+          in: "query"
+          required: false
+          description: "The number of bytes to read. Defaults to 256."
+          schema:
+            type: "integer"
+      responses:
+        '200':
+          description: "A binary stream of the memory contents."
+          content:
+            application/octet-stream:
+              schema:
+                type: "string"
+                format: "binary"
+  /machine:debugreg:
+    get:
+      tags:
+        - Machine Control
+      summary: Read Debug Register
+      description: Reads the 8-bit value of the U64 debug register.
+      operationId: machine_debugreg_get
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+        - Machine Control
+      summary: Write Debug Register
+      description: Writes an 8-bit value to the U64 debug register.
+      operationId: machine_debugreg_put
+      parameters:
+        - name: value
+          in: query
+          required: true
+          description: The hexadecimal value to write.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /drives:
+    get:
+      tags:
+        - Drives
+      summary: "List All Drives"
+      description: "Retrieves the status and information for all available virtual drives (A, B, etc.)."
+      operationId: "drives_list"
+      responses:
+        '200':
+          description: "OK"
+  /drives/{drive_letter}:mount:
+    put:
+      tags:
+        - Drives
+      summary: "Mount a Disk Image by Path"
+      description: "Mounts a disk image (e.g., .d64, .g64) from the device's filesystem to a specified virtual drive."
+      operationId: "drives_mount_put"
+      parameters:
+        - name: "drive_letter"
+          in: "path"
+          required: true
+          description: "The target drive (e.g., 'a' or 'b')."
+          schema:
+            type: "string"
+            enum: [a, b]
+        - name: "image"
+          in: "query"
+          required: true
+          description: "The full path to the disk image file on the Ultimate's storage (e.g., '/USB0/MyDisks/game.d64')."
+          schema:
+            type: "string"
+      responses:
+        '200':
+          description: "OK"
+    post:
+      tags:
+        - Drives
+      summary: "Mount an Uploaded Disk Image"
+      description: "Uploads a disk image file and mounts it to a specified virtual drive."
+      operationId: "drives_mount_post"
+      parameters:
+        - name: "drive_letter"
+          in: "path"
+          required: true
+          description: "The target drive (e.g., 'a' or 'b')."
+          schema:
+            type: "string"
+            enum: [a, b]
+      requestBody:
+        description: "The disk image file to upload and mount."
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: "object"
+              properties:
+                file:
+                  type: "string"
+                  format: "binary"
+      responses:
+        '200':
+          description: "OK"
+  /drives/{drive_letter}:reset:
+    put:
+      tags:
+        - Drives
+      summary: Reset a Drive
+      description: Resets the specified virtual drive.
+      operationId: drives_reset
+      parameters:
+        - name: drive_letter
+          in: path
+          required: true
+          description: The drive to reset.
+          schema:
+            type: string
+            enum: [a, b]
+      responses:
+        '200':
+          description: OK
+  /drives/{drive_letter}:remove:
+    put:
+      tags:
+        - Drives
+      summary: Remove a Disk
+      description: Removes (unmounts) the disk from the specified virtual drive.
+      operationId: drives_remove
+      parameters:
+        - name: drive_letter
+          in: path
+          required: true
+          description: The drive to remove the disk from.
+          schema:
+            type: string
+            enum: [a, b]
+      responses:
+        '200':
+          description: OK
+  /drives/{drive_letter}:on:
+    put:
+      tags:
+        - Drives
+      summary: Turn a Drive On
+      description: Powers on the specified virtual drive.
+      operationId: drives_on
+      parameters:
+        - name: drive_letter
+          in: path
+          required: true
+          description: The drive to turn on.
+          schema:
+            type: string
+            enum: [a, b]
+      responses:
+        '200':
+          description: OK
+  /drives/{drive_letter}:off:
+    put:
+      tags:
+        - Drives
+      summary: Turn a Drive Off
+      description: Powers off the specified virtual drive.
+      operationId: drives_off
+      parameters:
+        - name: drive_letter
+          in: path
+          required: true
+          description: The drive to turn off.
+          schema:
+            type: string
+            enum: [a, b]
+      responses:
+        '200':
+          description: OK
+  /drives/{drive_letter}:load_rom:
+    put:
+      tags:
+        - Drives
+      summary: Load Drive ROM from Path
+      description: Loads a custom ROM file into the specified virtual drive.
+      operationId: drives_load_rom_put
+      parameters:
+        - name: drive_letter
+          in: path
+          required: true
+          description: The drive to load the ROM into.
+          schema:
+            type: string
+            enum: [a, b]
+        - name: file
+          in: query
+          required: true
+          description: The full path to the ROM file.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Drives
+      summary: Upload and Load Drive ROM
+      description: Uploads a ROM file and loads it into the specified virtual drive.
+      operationId: drives_load_rom_post
+      parameters:
+        - name: drive_letter
+          in: path
+          required: true
+          description: The drive to load the ROM into.
+          schema:
+            type: string
+            enum: [a, b]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+  /drives/{drive_letter}:set_mode:
+    put:
+      tags:
+        - Drives
+      summary: Set Drive Emulation Mode
+      description: Sets the emulation mode for the specified virtual drive.
+      operationId: drives_set_mode
+      parameters:
+        - name: drive_letter
+          in: path
+          required: true
+          description: The drive to configure.
+          schema:
+            type: string
+            enum: [a, b]
+        - name: mode
+          in: query
+          required: true
+          description: The drive type to emulate.
+          schema:
+            type: string
+            enum: [1541, 1571, 1581]
+      responses:
+        '200':
+          description: OK
+  /files/{path}:info:
+    get:
+      tags:
+        - Files
+      summary: "Get File or Directory Information"
+      description: "Retrieves information about a specific file or lists the contents of a directory. The path must be URL-encoded."
+      operationId: "files_info"
+      parameters:
+        - name: "path"
+          in: "path"
+          required: true
+          description: "The full, URL-encoded path to the file or directory."
+          schema:
+            type: "string"
+      responses:
+        '200':
+          description: "OK"
+  /files/{path}:create_d64:
+    put:
+      tags:
+        - Files
+      summary: Create a D64 Disk Image
+      description: Creates a new, blank .d64 disk image file at the specified path.
+      operationId: files_create_d64
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: The full path, including the desired filename, for the new disk image.
+          schema:
+            type: string
+        - name: tracks
+          in: query
+          required: false
+          description: The number of tracks for the new image (35-41). Defaults to 35.
+          schema:
+            type: integer
+        - name: diskname
+          in: query
+          required: false
+          description: The internal disk name for the new image.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /files/{path}:create_d71:
+    put:
+      tags:
+        - Files
+      summary: Create a D71 Disk Image
+      description: Creates a new, blank .d71 disk image file at the specified path.
+      operationId: files_create_d71
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: The full path, including the desired filename, for the new disk image.
+          schema:
+            type: string
+        - name: diskname
+          in: query
+          required: false
+          description: The internal disk name for the new image.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /files/{path}:create_d81:
+    put:
+      tags:
+        - Files
+      summary: Create a D81 Disk Image
+      description: Creates a new, blank .d81 disk image file at the specified path.
+      operationId: files_create_d81
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: The full path, including the desired filename, for the new disk image.
+          schema:
+            type: string
+        - name: diskname
+          in: query
+          required: false
+          description: The internal disk name for the new image.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /files/{path}:create_dnp:
+    put:
+      tags:
+        - Files
+      summary: Create a DNP Disk Image
+      description: Creates a new, blank .dnp (native partition) image file at the specified path.
+      operationId: files_create_dnp
+      parameters:
+        - name: path
+          in: path
+          required: true
+          description: The full path, including the desired filename, for the new disk image.
+          schema:
+            type: string
+        - name: tracks
+          in: query
+          required: true
+          description: The number of tracks for the new image (1-255).
+          schema:
+            type: integer
+        - name: diskname
+          in: query
+          required: false
+          description: The internal disk name for the new image.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /streams/{stream_name}:start:
+    put:
+      tags:
+        - Streams
+      summary: "Start a Data Stream"
+      description: "Starts streaming C64 data (video, audio, or debug) to a specified IP address and port."
+      operationId: "streams_start"
+      parameters:
+        - name: "stream_name"
+          in: "path"
+          required: true
+          description: "The type of stream to start."
+          schema:
+            type: "string"
+            enum: ["video", "audio", "debug"]
+        - name: "ip"
+          in: "query"
+          required: true
+          description: "The destination IP address or hostname."
+          schema:
+            type: "string"
+      responses:
+        '200':
+          description: "OK"
+  /streams/{stream_name}:stop:
+    put:
+      tags:
+        - Streams
+      summary: "Stop a Data Stream"
+      description: "Stops an active data stream."
+      operationId: "streams_stop"
+      parameters:
+        - name: "stream_name"
+          in: "path"
+          required: true
+          description: "The type of stream to stop."
+          schema:
+            type: "string"
+            enum: ["video", "audio", "debug"]
+      responses:
+        '200':
+          description: "OK"
+  /configs:
+    get:
+      tags:
+        - Configuration
+      summary: Get All Configuration Categories
+      description: Retrieves a list of all available configuration categories.
+      operationId: configs_get_all
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - Configuration
+      summary: Update Multiple Configuration Items
+      description: Updates multiple configuration items at once by sending a JSON object in the request body.
+      operationId: configs_post
+      requestBody:
+        description: A JSON object where keys are category names and values are objects of item-value pairs.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: OK
+  /configs/{category}:
+    get:
+      tags:
+        - Configuration
+      summary: Get Items in a Category
+      description: Retrieves all the configuration items and their current values within a specific category.
+      operationId: configs_get_category
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: The name of the configuration category.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /configs/{category}/{item}:
+    get:
+      tags:
+        - Configuration
+      summary: Get a Specific Configuration Item
+      description: Retrieves the details of a single configuration item, including its current value, available options, and default value.
+      operationId: configs_get_item
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: The name of the configuration category.
+          schema:
+            type: string
+        - name: item
+          in: path
+          required: true
+          description: The name of the configuration item.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+        - Configuration
+      summary: Update a Specific Configuration Item
+      description: Updates the value of a single configuration item.
+      operationId: configs_put_item
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: The name of the configuration category.
+          schema:
+            type: string
+        - name: item
+          in: path
+          required: true
+          description: The name of the configuration item.
+          schema:
+            type: string
+        - name: value
+          in: query
+          required: true
+          description: The new value for the configuration item.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  /configs:load_from_flash:
+    put:
+      tags:
+        - Configuration
+      summary: Load All Configurations from Flash
+      description: Loads all configuration settings from the internal flash memory, discarding any unsaved changes.
+      operationId: configs_load_from_flash
+      responses:
+        '200':
+          description: OK
+  /configs:save_to_flash:
+    put:
+      tags:
+        - Configuration
+      summary: Save All Configurations to Flash
+      description: Saves all current configuration settings to the internal flash memory.
+      operationId: configs_save_to_flash
+      responses:
+        '200':
+          description: OK
+  /configs:reset_to_default:
+    put:
+      tags:
+        - Configuration
+      summary: Reset All Configurations to Default
+      description: Resets all configuration settings to their factory defaults.
+      operationId: configs_reset_to_default
+      responses:
+        '200':
+          description: OK
