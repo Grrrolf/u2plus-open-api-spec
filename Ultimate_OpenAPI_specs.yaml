@@ -4,7 +4,7 @@ info:
   description: This document describes the REST API for the 1541 Ultimate-II+ and Ultimate 64 firmware. It provides endpoints for controlling the machine, managing drives, accessing files, and configuring the device. The API follows a `/v1/{route}/{path}:{command}` structure.
   version: "1.0"
 servers:
-  - url: http://{ultimate_ip}/api/v1
+  - url: http://{ultimate_ip}/v1
     description: The local API endpoint for the Ultimate device.
     variables:
       ultimate_ip:
