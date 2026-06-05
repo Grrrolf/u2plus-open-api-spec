@@ -24,7 +24,7 @@ paths:
       tags:
         - About
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -36,10 +36,10 @@ paths:
                       "errors": [ ]
                     }
               schema:
-                $ref: '#/components/schemas/VersionResponse'
-        '404':
+                $ref: "#/components/schemas/VersionResponse"
+        "404":
           description: Not Found
-        '504':
+        "504":
           description: Gateway Timeout
   /info:
     get:
@@ -49,19 +49,19 @@ paths:
       tags:
         - About
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InfoResponse'
-        '404':
+                $ref: "#/components/schemas/InfoResponse"
+        "404":
           description: Not Found
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /machine:reset:
     put:
       operationId: resetMachine
@@ -70,14 +70,14 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
   /machine:reboot:
     put:
@@ -87,14 +87,14 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
   /machine:pause:
     put:
@@ -106,14 +106,14 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
   /machine:resume:
     put:
@@ -123,17 +123,17 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
           content:
-            application/json: { }
+            application/json: {}
   /machine:poweroff:
     put:
       operationId: powerOffMachine
@@ -144,14 +144,14 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
   /machine:menu_button:
     put:
@@ -161,13 +161,13 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Button event queued
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /machine:menu_screen:
     get:
       operationId: getMenuScreen
@@ -181,7 +181,7 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Readable 40x25 menu screen returned
           headers:
             Content-Length:
@@ -191,14 +191,14 @@ paths:
           content:
             application/octet-stream:
               schema:
-                $ref: '#/components/schemas/MenuScreenBytes'
-        '404':
+                $ref: "#/components/schemas/MenuScreenBytes"
+        "404":
           description: No readable menu screen is currently available
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
                 unavailable:
                   value:
@@ -212,12 +212,12 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Input state returned
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InputStateResponse'
+                $ref: "#/components/schemas/InputStateResponse"
               examples:
                 empty:
                   value:
@@ -229,13 +229,13 @@ paths:
                       - port: 2
                         inputs: []
                     errors: []
-        '501':
+        "501":
           description: Keyboard and joystick injection are not available on this hardware
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
     post:
       operationId: injectInput
       summary: Inject keyboard and joystick input
@@ -254,7 +254,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InputRequest'
+              $ref: "#/components/schemas/InputRequest"
             examples:
               shifted_key_and_joystick:
                 value:
@@ -271,26 +271,26 @@ paths:
                         - a
                       transition: tap
       responses:
-        '200':
+        "200":
           description: Events applied
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InputStateResponse'
-        '400':
+                $ref: "#/components/schemas/InputStateResponse"
+        "400":
           description: Invalid body, content type, or event batch
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '501':
+                  - $ref: "#/components/schemas/Errors"
+        "501":
           description: Keyboard and joystick injection are not available on this hardware
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /machine:readmem:
     get:
       operationId: readMemory
@@ -323,11 +323,11 @@ paths:
             minimum: 0
             example: 128
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/octet-stream: {}
-        '400':
+        "400":
           description: Bad request
           content:
             application/json:
@@ -349,8 +349,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
   /machine:writemem:
     put:
@@ -387,7 +387,7 @@ paths:
             type: string
           example: "1024"
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -400,8 +400,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad request
           content:
             application/json:
@@ -418,8 +418,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
     post:
       operationId: writeManyDataToMemoryPost
@@ -445,7 +445,7 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -458,8 +458,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad request
           content:
             application/json:
@@ -476,8 +476,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
   /machine:debugreg:
     get:
@@ -489,7 +489,7 @@ paths:
       tags:
         - Machine operations
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -502,8 +502,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
     put:
       operationId: writeDebugRegister
@@ -524,7 +524,7 @@ paths:
             type: string
           example: "3F"
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -537,8 +537,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
   /runners:sidplay:
     put:
@@ -567,7 +567,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -584,10 +584,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -619,7 +619,7 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -636,10 +636,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -649,7 +649,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -677,7 +677,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -694,10 +694,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -707,7 +707,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -729,7 +729,7 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -747,10 +747,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -760,7 +760,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -789,7 +789,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -806,10 +806,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -819,7 +819,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -842,7 +842,7 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -860,10 +860,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -873,7 +873,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -902,7 +902,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -915,10 +915,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -928,7 +928,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -951,13 +951,13 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
                 OK:
                   value: |-
@@ -969,9 +969,9 @@ paths:
                     {
                       "errors" : [ "Function run_prg does not have parameter invalidParameterName", "Function run_prg requires parameter file" ]
                     }
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -979,9 +979,9 @@ paths:
                 Undefined subsystem command:
                   value: |-
                     {
-                      "errors" : [ "Undefined subsystem command" ]x
+                      "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -1010,7 +1010,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1027,10 +1027,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -1040,7 +1040,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -1063,7 +1063,7 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1081,10 +1081,10 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -1094,7 +1094,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -1115,7 +1115,7 @@ paths:
       tags:
         - Floppy drives
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1168,7 +1168,7 @@ paths:
                       "errors": []
                     }
               schema:
-                $ref: '#/components/schemas/DriveListResponse'
+                $ref: "#/components/schemas/DriveListResponse"
   /drives/{drive}:mount:
     put:
       operationId: putMountDiskImage
@@ -1225,7 +1225,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1246,8 +1246,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1262,9 +1262,9 @@ paths:
                     { 
                       "errors" : [ "Invalid Type 'd65'" ]
                     }
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -1274,7 +1274,7 @@ paths:
                     {
                       "errors" : [ "Undefined subsystem command" ]
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -1334,7 +1334,7 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1351,8 +1351,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1362,9 +1362,9 @@ paths:
                     {
                       "errors": [ "Invalid Drive 'c'" ]
                     }
-        '404':
+        "404":
           description: Not Found
-        '500':
+        "500":
           description: Internal server error
           content:
             application/json:
@@ -1379,7 +1379,7 @@ paths:
                     {
                       'errors': ['Read operation on file failed']
                     }
-        '507':
+        "507":
           description: Unknown
           content:
             application/json:
@@ -1408,7 +1408,7 @@ paths:
             Valid options are one of the following: <br>
             `a`, `b`
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1420,8 +1420,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1433,7 +1433,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /drives/{drive}:remove:
     put:
       operationId: putRemoveDisk
@@ -1453,7 +1453,7 @@ paths:
             Valid options are one of the following: <br>
             `a`, `b`
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1465,8 +1465,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1478,7 +1478,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /drives/{drive}:unlink:
     put:
       operationId: putUnlinkDisk
@@ -1499,7 +1499,7 @@ paths:
             Valid options are one of the following: <br>
             `a`, `b`
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1511,8 +1511,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1524,7 +1524,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /drives/{drive}:on:
     put:
       operationId: putUnEnableDrive
@@ -1544,7 +1544,7 @@ paths:
             Valid options are one of the following: <br>
             `a`, `b`
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1556,8 +1556,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1569,7 +1569,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /drives/{drive}:off:
     put:
       operationId: putDisableDrive
@@ -1590,7 +1590,7 @@ paths:
             Valid options are one of the following: <br>
             `a`, `b`
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1602,8 +1602,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1615,7 +1615,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /drives/{drive}:load_rom:
     put:
       operationId: putLoadDriveRom
@@ -1649,7 +1649,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1661,8 +1661,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1674,7 +1674,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
     post:
       operationId: postLoadRom
       summary: Load disk drive rom
@@ -1703,7 +1703,7 @@ paths:
           application/octet-stream:
             schema: {}
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1715,8 +1715,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1728,7 +1728,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /drives/{drive}:set_mode:
     put:
       operationId: postSetMode
@@ -1754,13 +1754,13 @@ paths:
           schema:
             type: string
             enum:
-              - '1541'
-              - '1571'
-              - '1581'
+              - "1541"
+              - "1571"
+              - "1581"
           required: true
           description: The available values are `1541`, `1571` and `1581`.
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1772,8 +1772,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1785,7 +1785,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /streams/{streamname}:start:
     put:
       operationId: putStartDataStream
@@ -1824,7 +1824,7 @@ paths:
             type: string
             default: video
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1836,8 +1836,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1858,25 +1858,19 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '404':
+                  - $ref: "#/components/schemas/Errors"
+        "404":
           description: Not Found
           content:
             application/json:
               examples:
                 "Network Host Resolve Error":
-                  value:
-                    {
-                      "errors": [ "Network Host Resolve Error" ]
-                    }
+                  value: { "errors": ["Network Host Resolve Error"] }
                 "Unrecognized stream name":
-                  value:
-                    {
-                      "errors": [ "Unrecognized stream name 'vdeo'" ]
-                    }
+                  value: { "errors": ["Unrecognized stream name 'vdeo'"] }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /streams/{streamname}:stop:
     put:
       operationId: putStopDataStream
@@ -1897,7 +1891,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1909,8 +1903,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -1944,7 +1938,7 @@ paths:
       tags:
         - Configuration
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -1996,8 +1990,8 @@ paths:
                         "errors": []
                       }
               schema:
-                $ref: '#/components/schemas/ConfigListResponse'
-        '404':
+                $ref: "#/components/schemas/ConfigListResponse"
+        "404":
           description: Endpoint not found
     post:
       operationId: postConfig
@@ -2018,7 +2012,7 @@ paths:
                   properties:
                     Drive:
                       type: string
-                      enum: [ "Enabled", "Disabled" ]
+                      enum: ["Enabled", "Disabled"]
                     "Drive Type":
                       type: integer
                     "Drive Bus ID":
@@ -2028,7 +2022,7 @@ paths:
                   properties:
                     Drive:
                       type: string
-                      enum: [ "Enabled", "Disabled" ]
+                      enum: ["Enabled", "Disabled"]
               example:
                 "Drive A Settings":
                   Drive: "Enabled"
@@ -2038,7 +2032,7 @@ paths:
                   Drive: "Disabled"
 
       responses:
-        '200':
+        "200":
           description: OK
   /configs/{category}:
     get:
@@ -2107,7 +2101,7 @@ paths:
             type: string
 
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -2141,14 +2135,14 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   categories:
                     type: array
                     items:
                       type: string
-        '404':
+        "404":
           description: Endpoint not found
   /configs/{category}/{item}:
     get:
@@ -2177,7 +2171,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -2228,14 +2222,14 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   categories:
                     type: array
                     items:
                       type: string
-        '404':
+        "404":
           description: Endpoint not found
     put:
       operationId: putConfigCategoryItem
@@ -2291,7 +2285,7 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
@@ -2303,8 +2297,8 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
-        '400':
+                  - $ref: "#/components/schemas/Errors"
+        "400":
           description: Bad Request
           content:
             application/json:
@@ -2316,7 +2310,7 @@ paths:
                     }
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
   /configs:load_from_flash:
     put:
       operationId: PutConfigFromFlash
@@ -2328,7 +2322,7 @@ paths:
       tags:
         - Configuration
       responses:
-        '200':
+        "200":
           description: OK
   /configs:save_to_flash:
     put:
@@ -2339,7 +2333,7 @@ paths:
       tags:
         - Configuration
       responses:
-        '200':
+        "200":
           description: OK
   /configs:reset_to_default:
     put:
@@ -2350,7 +2344,7 @@ paths:
       tags:
         - Configuration
       responses:
-        '200':
+        "200":
           description: OK
   /files/{path}:info:
     get:
@@ -2370,15 +2364,15 @@ paths:
           description: |-
             The path to the folder where the disk image will be created.
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
-                'File information - d64':
+                "File information - d64":
                   value: |-
                     {
                       "files": {
@@ -2389,7 +2383,7 @@ paths:
                       },
                       "errors": []
                     }
-                'File information - d71':
+                "File information - d71":
                   value: |-
                     {
                       "files": {
@@ -2400,7 +2394,7 @@ paths:
                       },
                       "errors": []
                     }
-                'File information - d81':
+                "File information - d81":
                   value: |-
                     {
                       "files": {
@@ -2411,7 +2405,7 @@ paths:
                       },
                       "errors": []
                     }
-                'Directory information':
+                "Directory information":
                   value: |-
                     {
                       "files": {
@@ -2422,26 +2416,26 @@ paths:
                       },
                       "errors": []
                     }
-        '400':
+        "400":
           description: "Bad request"
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
                 "Require parameter tracks":
                   value: |-
                     {
                       "errors" : [ "Function create_dnp requires parameter tracks" ]
                     }
-        '404':
+        "404":
           description: Not found
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
                 FILE DOESN'T EXIST:
                   value: |-
@@ -2486,13 +2480,13 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   path:
@@ -2526,13 +2520,13 @@ paths:
                       "bytes_written": 196608,
                       "errors": []
                     }
-        '500':
+        "500":
           description: "Error: Internal Server Error"
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   version:
@@ -2575,15 +2569,15 @@ paths:
             type: string
             example: "-= scs+trc 2024 =-"
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
-                'Successful operation':
+                "Successful operation":
                   value: |-
                     {
                       "path": "/Temp/diskimage.d71",
@@ -2592,13 +2586,13 @@ paths:
                       "bytes_written": 349696,
                       "errors": []
                     }
-        '500':
+        "500":
           description: "Error: Internal Server Error"
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   version:
@@ -2639,15 +2633,15 @@ paths:
             type: string
             example: -= scs+trc =-
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
-                'Successful operation':
+                "Successful operation":
                   value: |-
                     {
                       "path": "/Temp/diskimage.d81",
@@ -2655,13 +2649,13 @@ paths:
                       "bytes_written": 819200,
                       "errors": []
                     }
-        '500':
+        "500":
           description: "Error: Internal Server Error"
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   version:
@@ -2713,13 +2707,13 @@ paths:
       tags:
         - Files
       responses:
-        '200':
+        "200":
           description: Successful operation.
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   path:
@@ -2745,26 +2739,26 @@ paths:
                       "bytes_written": 16711680,
                       "errors": []
                     }
-        '400':
+        "400":
           description: "Bad request"
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
               examples:
                 "Requires parameter tracks":
                   value: |-
                     {
                       "errors" : [ "Function create_dnp requires parameter tracks" ]
                     }
-        '500':
+        "500":
           description: "Error: Internal Server Error"
           content:
             application/json:
               schema:
                 allOf:
-                  - $ref: '#/components/schemas/Errors'
+                  - $ref: "#/components/schemas/Errors"
                 type: object
                 properties:
                   version:
@@ -2785,7 +2779,7 @@ components:
   schemas:
     Errors:
       type: object
-      required: [ errors ]
+      required: [errors]
       properties:
         errors:
           type: array
@@ -2793,7 +2787,7 @@ components:
             type: string
     VersionResponse:
       allOf:
-        - $ref: '#/components/schemas/Errors'
+        - $ref: "#/components/schemas/Errors"
         - type: object
           required:
             - version
@@ -2802,7 +2796,7 @@ components:
               type: string
     InfoResponse:
       allOf:
-        - $ref: '#/components/schemas/Errors'
+        - $ref: "#/components/schemas/Errors"
         - type: object
           properties:
             product:
@@ -2846,16 +2840,16 @@ components:
         - f3
         - f5
         - cursor_up_down
-        - '0'
-        - '1'
-        - '2'
-        - '3'
-        - '4'
-        - '5'
-        - '6'
-        - '7'
-        - '8'
-        - '9'
+        - "0"
+        - "1"
+        - "2"
+        - "3"
+        - "4"
+        - "5"
+        - "6"
+        - "7"
+        - "8"
+        - "9"
         - a
         - b
         - c
@@ -2934,9 +2928,9 @@ components:
           maxItems: 8
           uniqueItems: true
           items:
-            $ref: '#/components/schemas/KeyboardInputName'
+            $ref: "#/components/schemas/KeyboardInputName"
         transition:
-          $ref: '#/components/schemas/InputTransition'
+          $ref: "#/components/schemas/InputTransition"
     JoystickInputEvent:
       type: object
       additionalProperties: false
@@ -2960,9 +2954,9 @@ components:
           maxItems: 7
           uniqueItems: true
           items:
-            $ref: '#/components/schemas/JoystickInputName'
+            $ref: "#/components/schemas/JoystickInputName"
         transition:
-          $ref: '#/components/schemas/InputTransition'
+          $ref: "#/components/schemas/InputTransition"
     ReleaseAllInputEvent:
       type: object
       additionalProperties: false
@@ -2974,9 +2968,9 @@ components:
           const: release_all
     InputEvent:
       oneOf:
-        - $ref: '#/components/schemas/KeyboardInputEvent'
-        - $ref: '#/components/schemas/JoystickInputEvent'
-        - $ref: '#/components/schemas/ReleaseAllInputEvent'
+        - $ref: "#/components/schemas/KeyboardInputEvent"
+        - $ref: "#/components/schemas/JoystickInputEvent"
+        - $ref: "#/components/schemas/ReleaseAllInputEvent"
     InputRequest:
       type: object
       additionalProperties: false
@@ -2988,7 +2982,7 @@ components:
           minItems: 1
           maxItems: 64
           items:
-            $ref: '#/components/schemas/InputEvent'
+            $ref: "#/components/schemas/InputEvent"
     KeyboardInputState:
       type: object
       required:
@@ -2997,7 +2991,7 @@ components:
         inputs:
           type: array
           items:
-            $ref: '#/components/schemas/KeyboardInputName'
+            $ref: "#/components/schemas/KeyboardInputName"
     JoystickInputState:
       type: object
       required:
@@ -3012,26 +3006,26 @@ components:
         inputs:
           type: array
           items:
-            $ref: '#/components/schemas/JoystickInputName'
+            $ref: "#/components/schemas/JoystickInputName"
     InputStateResponse:
       allOf:
-        - $ref: '#/components/schemas/Errors'
+        - $ref: "#/components/schemas/Errors"
         - type: object
           required:
             - keyboard
             - joysticks
           properties:
             keyboard:
-              $ref: '#/components/schemas/KeyboardInputState'
+              $ref: "#/components/schemas/KeyboardInputState"
             joysticks:
               type: array
               minItems: 2
               maxItems: 2
               items:
-                $ref: '#/components/schemas/JoystickInputState'
+                $ref: "#/components/schemas/JoystickInputState"
     DriveListResponse:
       allOf:
-        - $ref: '#/components/schemas/Errors'
+        - $ref: "#/components/schemas/Errors"
         - type: object
           properties:
             drives:
@@ -3066,7 +3060,7 @@ components:
                             type: string
     ConfigListResponse:
       allOf:
-        - $ref: '#/components/schemas/Errors'
+        - $ref: "#/components/schemas/Errors"
         - type: object
           properties:
             categories:
