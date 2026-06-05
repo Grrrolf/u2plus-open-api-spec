@@ -492,7 +492,7 @@ paths:
             Content-Length:
               schema:
                 type: integer
-                const: 2000
+                enum: [2000]
           content:
             application/octet-stream:
               schema:
@@ -514,7 +514,7 @@ paths:
       tags:
         - Machine Control
       summary: Get REST-injected input state
-      description: Returns the currently active keyboard and joystick inputs injected through the REST input endpoint. Ultimate 64-class input hardware is required; on Ultimate-II+ hardware this returns HTTP 501.
+      description: Returns the currently active keyboard and joystick inputs injected through the REST input endpoint. Ultimate 64-class hardware is required; this endpoint is not supported on Ultimate-II/Ultimate-II+ hardware and returns HTTP 501 there.
       operationId: machine_input_get
       responses:
         '200':
@@ -524,7 +524,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/InputStateResponse'
         '501':
-          description: Keyboard and joystick injection are not available on this hardware
+          description: Keyboard and joystick injection are not supported on this hardware
           content:
             application/json:
               schema:
@@ -540,8 +540,8 @@ paths:
         complete batch before applying any event; invalid batches return HTTP
         400 and leave the current input state unchanged. When the firmware menu
         is active, keyboard events are translated to menu keystrokes.
-        Ultimate 64-class input hardware is required; on Ultimate-II+ hardware
-        this returns HTTP 501.
+        Ultimate 64-class hardware is required; this endpoint is not supported
+        on Ultimate-II/Ultimate-II+ hardware and returns HTTP 501 there.
       operationId: machine_input_post
       requestBody:
         required: true
@@ -564,7 +564,7 @@ paths:
                 allOf:
                   - $ref: '#/components/schemas/Errors'
         '501':
-          description: Keyboard and joystick injection are not available on this hardware
+          description: Keyboard and joystick injection are not supported on this hardware
           content:
             application/json:
               schema:
